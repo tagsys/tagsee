@@ -1,0 +1,4 @@
+
+#please install the impinj lib to local responsity firstly for once.
+
+mvn install:install-file -Dfile=lib/ltkjava-10.16.0.240-with-dependencies.jar -DgroupId=org.llrp -DartifactId=ltk -Dversion=10.16.0.240 -Dpackaging=jar  
