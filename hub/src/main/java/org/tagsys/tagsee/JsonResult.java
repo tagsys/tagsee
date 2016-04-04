@@ -47,6 +47,15 @@ public class JsonResult extends HashMap<String, Object>{
 	
 	@Override
 	public String toString(){
+		String message =  (String)this.get("errorMessage");
+		if(message==null){
+			switch(this.getErrorCode()){
+				case 1002: message = "This reader has been in the hub."; break;
+				case 500: message = "Internal error";break;
+				case -1: message="Unknown error";break;
+			}
+			this.setErrorMessage(message);
+		}
 		return gson.toJson(this);
 	}
 	

@@ -1,0 +1,196 @@
+.note-editor,
+.note-popover {
+    border-color: #e4e4e4;
+
+    .note-toolbar,
+    .popover-content {
+        background: #fff;
+        border-color: #e4e4e4;
+        margin: 0;
+        padding: 10px 0 15px;
+        text-align: center;
+        
+        & > .btn-group {
+            display: inline-block;
+            float: none;
+            box-shadow: none;
+            
+            .btn {
+                margin: 0 1px;
+            }
+            
+            & > .active {
+                background: @m-cyan;
+                color: #fff;
+            }
+        }
+        
+            
+        .btn {
+            height: 40px;
+            border-radius: 2px !important;
+            box-shadow: none !important;
+            
+            &:active {
+                box-shadow: none;
+            }
+        }
+
+        .note-palette-title {
+            margin: 0 !important;
+            padding: 10px 0 !important;
+            font-size: 13px !important;
+            text-align: center !important;  
+            border: 0 !important;
+        }
+        
+        .note-color-reset {
+            padding: 0 0 10px !important;
+            margin: 0 !important;
+            background: none;
+            text-align: center;
+        }
+         
+        .note-color {
+            .dropdown-menu {
+                min-width: 335px;
+            }
+        }
+    }
+    
+    .note-statusbar {
+        .note-resizebar {
+            border-color: #E8E8E8;
+            
+            .note-icon-bar {
+                border-color: #BCBCBC;
+            }
+        }
+    }
+    
+    .fa {
+        font-style: normal;
+        font-size: 20px;
+        vertical-align: middle;
+        
+        &:before {
+            font-family: 'Material Design Iconic Font';
+        }
+        
+        &.fa-magic:before {
+            content: "\f11b";
+        }
+        
+        &.fa-bold:before {
+            content: "\f17a";
+        }
+        
+        &.fa-italic:before {
+            content: "\f181";
+        }
+        
+        &.fa-underline:before {
+            content: "\f18b";
+        }
+        
+        &.fa-font:before {
+            content: "\f17e";
+        }
+        
+        &.fa-list-ul:before {
+            content: "\f183";
+        }
+        
+        &.fa-list-ol:before {
+            content: "\f184";
+        }
+
+        &.fa-align-left:before {
+            content: "\f178";
+        }
+        
+        &.fa-align-left:before {
+            content: "\f178";
+        }
+        
+        &.fa-align-right:before {
+            content: "\f179";
+        }
+
+        &.fa-align-center:before {
+            content: "\f176";
+        }
+
+        &.fa-align-justify:before {
+            content: "\f177";
+        }
+        
+        &.fa-indent:before {
+            content: "\f180";
+        }
+        
+        &.fa-outdent:before {
+            content: "\f17f";
+        }
+        
+        &.fa-text-height:before {
+            content: "\f182";
+        }
+        
+        &.fa-table:before {
+            content: "\f21e";
+        }
+        
+        &.fa-link:before {
+            content: "\f10d";
+        }
+        
+        &.fa-picture-o:before {
+            content: "\f224";
+        }
+        
+        &.fa-minus:before {
+            content: "\f16e";
+        }
+        
+        &.fa-arrows-alt:before {
+            content: "\f29f";
+        }
+        
+        &.fa-code:before {
+            content: "\f066";
+        }
+        
+        &.fa-question:before {
+            content: "\f033";
+        }
+        
+        &.fa-eraser:before {
+            content: "\f17b";
+        }
+        
+        &.fa-square:before {
+            content: "\f1f4";
+        }
+        
+        &.fa-circle-o:before {
+            content: "\f2e3";
+        }
+        
+        &.fa-times:before {
+            content: "\f29a";
+        }
+    }
+    
+    .note-air-popover {
+        .arrow {
+            left: 20px;
+        }
+    }
+}
+
+.note-editor {
+    .note-editable {
+        padding: 20px 23px;
+    }
+}

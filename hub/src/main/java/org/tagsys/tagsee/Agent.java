@@ -38,6 +38,14 @@ public class Agent implements LLRPEndpoint {
 	private String ip;
 	
 	private int status; // 0 - disconnected, 1 - connected, 2 - reading.
+	
+	private String name;
+	
+	private String remark;
+	
+	private long createdTime;
+	
+	private long lastUpdatedTime;
 
 	private static Logger logger = Logger.getLogger(Agent.class);
 
@@ -75,6 +83,38 @@ public class Agent implements LLRPEndpoint {
 	
 	public String getIP(){
 		return this.ip;
+	}
+	
+	public void setName(String name){
+		this.name = name;
+	}
+	
+	public String getName(){
+		return this.name;
+	}
+	
+	public void setRemark(String remark){
+		this.remark = remark;
+	}
+	
+	public String getRemark(){
+		return this.remark;
+	}
+	
+	public long getCreatedTime(){
+		return this.createdTime;
+	}
+	
+	public void setCreatedTime(long time){
+		this.createdTime = time;
+	}
+	
+	public long getLastUpdatedTime(){
+		return this.lastUpdatedTime;
+	}
+	
+	public void setLastUpdatedTime(long time){
+		this.lastUpdatedTime = time;
 	}
 
 	public boolean connect() throws LLRPConnectionAttemptFailedException {

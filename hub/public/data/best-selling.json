@@ -1,0 +1,23 @@
+{  
+   "list":[
+        {  
+
+            "id":1,
+            "img": "note4.jpg",
+            "name": "Samsung Galaxy Note 4",
+            "range": "$850.00 - $1199.99"
+        },
+        {
+            "id":2,
+            "img": "mate7.jpg",
+            "name": "Huawei Ascend Mate",
+            "range": "$649.59 - $749.99"
+        },
+        {
+            "id":3,
+            "img": "535.jpg",
+            "name": "Nokia Lumia 535",
+            "range": "$189.99 - $250.00"
+        }
+   ]
+}

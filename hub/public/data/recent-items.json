@@ -1,0 +1,29 @@
+{
+    "list": [
+        {
+            "id": 2569,
+            "name": "Samsung Galaxy Mega",
+            "price": 521
+        },
+        {
+            "id": 9658,
+            "name": "Huawei Ascend P6",
+            "price": 440
+        },
+        {
+            "id": 1101,
+            "name": "HTC One M8",
+            "price": 680
+        },
+        {
+            "id": 2569,
+            "name": "Samsung Galaxy Alpha",
+            "price": 870
+        },
+        {
+            "id": 6598,
+            "name": "LG G3",
+            "price": 690
+        }
+    ]
+}

@@ -1,0 +1,85 @@
+<header id="header" data-current-skin={{mactrl.currentSkin}} data-ng-include="'template/header.html'"
+        data-ng-controller="headerCtrl as hctrl"></header>
+
+<section id="main">
+    <aside id="sidebar" data-ng-include="'template/sidebar-left.html'"
+           data-ng-class="{ 'toggled': mactrl.sidebarToggle.left === true }"></aside>
+
+    <aside id="chat" data-ng-include="'template/chat.html'"
+           data-ng-class="{ 'toggled': mactrl.sidebarToggle.right === true }"></aside>
+
+    <section id="content">
+
+        <div class="container">
+            <div class="block-header"></div>
+            <div class="card" data-ng-controller="hubController">
+                <div class="card-header ch-alt m-b-20">
+                    <h2>
+                        Hub Dashboard
+                        <small>Phasellus condimentum ipsum id auctor
+                            imperdie
+                        </small>
+                    </h2>
+                    <ul class="actions">
+                        <li>
+                            <a href="" ng-click="discover()"> <i class="zmdi zmdi-refresh-alt"></i>
+                            </a>
+                        </li>
+                        <!--<li>-->
+                        <!--<a href="" ng-click="configure()"> <i class="zmdi zmdi-settings"></i>-->
+                        <!--</a>-->
+                        <!--</li>-->
+                    </ul>
+
+                    <button class="btn bgm-cyan btn-float" ng-click="addAgent($event)">
+                        <i class="zmdi zmdi-plus"></i>
+                    </button>
+                </div>
+
+                <div class="card-body">
+                    <div class="listview lv-bordered lv-lg">
+
+                        <div class="lv-item media" href="" data-ng-repeat="agent in agents" style="cursor: pointer;">
+
+                                <div class="pull-left">
+                                    <img class="lv-img-sm" data-ng-src="img/icons/reader.png" alt="">
+                                </div>
+                                <div class="media-body">
+                                    <div class="lv-title">
+                                        {{ agent.name }} ({{agent.ip}})
+                                        <span class="label label-info" ng-if="agent.status==0">disconnected</span>
+                                        <span class="label label-warning" ng-if="agent.status==1">connected</span>
+                                        <span class="label label-success" ng-if="agent.status==2">reading</span>
+                                    </div>
+                                    <small class="lv-small">{{ agent.remark }}</small>
+                                    <div class="lv-actions actions dropdown" uib-dropdown="">
+                                        <a href="" uib-dropdown-toggle="" aria-expanded="false" class="dropdown-toggle"
+                                           aria-haspopup="true">
+                                            <i class="zmdi zmdi-more-vert"></i>
+                                        </a>
+
+                                        <ul class="dropdown-menu dropdown-menu-right">
+                                            <li>
+                                                <a href="">Edit</a>
+                                            </li>
+                                            <li>
+                                                <a href="" ng-click="removeAgent(agent.ip)">
+                                                    <i class="zmdi zmdi-delete zmdi-hc-fw"></i>Delete
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                        </div>
+
+                        <div class="clearfix"></div>
+
+                        <a class="lv-footer" href="">View All</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</section>
+
+<footer id="footer" data-ng-include="'template/footer.html'"></footer>

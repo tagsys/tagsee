@@ -10,6 +10,12 @@
 
 package org.tagsys.tagsee;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
@@ -18,14 +24,65 @@ import org.llrp.ltk.exceptions.InvalidLLRPMessageException;
 import org.llrp.ltk.net.LLRPConnectionAttemptFailedException;
 
 import com.google.gson.Gson;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
 
 import spark.Request;
 import spark.Response;
+import spark.utils.StringUtils;
 
 public class Hub {
 	// storing all agents
 	private Map<String, Agent> agents = new HashMap<String, Agent>();
 	private Gson gson = new Gson();
+	
+	
+	public Hub(){
+		
+		try {
+			
+			this.load();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			
+		} 
+				
+		
+	}
+	
+	private void load() throws IOException{
+		
+		File file = new File("public/data/agents.json");
+		if(!file.exists()){
+			file.createNewFile();
+		}
+		
+		JsonReader reader = new JsonReader(new FileReader(file));
+		Agent[] agents = new Gson().fromJson(reader, Agent[].class);
+		
+		this.agents.clear();
+		for(Agent a: agents){
+			this.agents.put(a.getIP(),a);
+		}
+	}
+	
+	private void save() throws IOException{
+		File file = new File("public/data/agents.json");
+		if(!file.exists()){
+			file.createNewFile();
+		}
+		
+		FileWriter writer = new FileWriter(file);
+
+		String result = gson.toJson(this.agents.values().toArray(new Agent[0]));
+		
+		System.out.println(result);
+		
+		writer.write(result);
+		
+		writer.close();
+	}
 
 	private void formatResponse(Response resp) {
 		resp.status(200);
@@ -35,33 +92,55 @@ public class Hub {
 	public JsonResult discover(Request req, Response resp) {
 
 		formatResponse(resp);
+		
+			JsonResult result = new JsonResult();
 
-		JsonResult result = new JsonResult();
+			result.put("agents", agents);
 
-		result.put("agents", agents);
-
-		return result;
+			return result;
+		
+	}
+	
+	private Map<String, String> bodyParams(Request req){
+		String body = req.body();
+		if(!StringUtils.isEmpty(body)){
+			HashMap<String, String> bodyParams = (HashMap<String, String>)gson.fromJson(body, new HashMap<String, String>().getClass());
+			return bodyParams;
+		}
+		return new HashMap<String, String>();
 	}
 
 	public JsonResult createAgent(Request req, Response resp) {
 
 		formatResponse(resp);
 
-		String agentIP = req.queryParams("agentIP");
+		Map<String, String> bodyParams = this.bodyParams(req);
+ 		
+		String ip = bodyParams.get("ip");
+		String name = bodyParams.get("name");
+		String remark = bodyParams.get("remark");
 		
-		if(agentIP==null){
+		if(ip==null){
 			return new JsonResult(800,"Parameters is not correct.");
 		}
 
-		JsonResult result = new JsonResult();
-
-		if (agents.containsKey(agentIP)) {
-			result.put("errorCode", 1002);
+		if (agents.containsKey(ip)) {
+			return new JsonResult(1002);
 		} else {
-			Agent agent = new Agent(agentIP);
-			agents.put(agentIP, agent);
+			try {
+				Agent agent = new Agent(ip);
+				agent.setName(name);
+				agent.setRemark(remark);
+				agent.setCreatedTime(new Date().getTime());
+				agents.put(ip, agent);
+				this.save();
+				return new JsonResult();
+			} catch (IOException e) {
+				e.printStackTrace();
+				return new JsonResult(500);
+			}
+			
 		}
-		return result;
 
 	}
 
@@ -69,15 +148,20 @@ public class Hub {
 
 		formatResponse(resp);
 
-		String agentIP = req.queryParams("agentIP");
+		String agentIP = req.params(":ip");
 
 		if (!agents.containsKey(agentIP)) {
 			return new JsonResult(1003);
 		}
 
-		agents.remove(agentIP);
-
-		return new JsonResult(0);
+		try {
+			agents.remove(agentIP);
+			this.save();
+			return new JsonResult();
+		} catch (IOException e) {
+			e.printStackTrace();
+			return new JsonResult(500);
+		}
 	}
 
 	public JsonResult connectAgent(Request req, Response resp) {
