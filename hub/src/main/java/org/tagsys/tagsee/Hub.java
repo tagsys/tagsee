@@ -143,6 +143,34 @@ public class Hub {
 		}
 
 	}
+	
+	public JsonResult updateAgent(Request req, Response resp){
+		
+		formatResponse(resp);
+
+		String agentIP = req.params(":ip");
+
+		Agent agent = agents.get(agentIP);
+		
+		if (agent==null) {
+			return new JsonResult(1003);
+		}
+
+		try {
+			Map<String, String> bodyParams = this.bodyParams(req);
+			agent.setName(bodyParams.get("name"));
+			agent.setRemark(bodyParams.get("remark"));
+			agent.setLastUpdatedTime(new Date().getTime());
+			
+			this.save();
+			return new JsonResult();
+		} catch (IOException e) {
+			e.printStackTrace();
+			return new JsonResult(500);
+		}
+		
+		
+	}
 
 	public JsonResult removeAegnt(Request req, Response resp) {
 

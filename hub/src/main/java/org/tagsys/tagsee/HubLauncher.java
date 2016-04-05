@@ -35,6 +35,10 @@ public class HubLauncher {
 			return hub.createAgent(req, resp);
 		});
 		
+		Spark.post("/service/agent/:ip/update", (req, resp)->{
+			return hub.updateAgent(req, resp);
+		});
+		
 		Spark.post("/service/agent/:ip/remove", (req,resp)->{
 			return hub.removeAegnt(req, resp);
 		});

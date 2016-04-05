@@ -24,7 +24,7 @@
     "angular-ui-router": "ui-router#~0.2.15",
     "animate.css": "daneden/animate.css#~3.3.0",
     "autosize": "~3.0.6",
-    "bootstrap-sweetalert": "~0.4.5",
+    "bootstrap-sweetalert": "*",
     "bower": "*",
     "br-validations": "~0.2.4",
     "eonasdan-bootstrap-datetimepicker": "Eonasdan/bootstrap-datetimepicker#~4.7.14",
@@ -46,9 +46,10 @@
     "simpleWeather": "~3.0.2",
     "string-mask": "~0.2.0",
     "summernote": "~0.6.7",
-    "sweetalert": "~1.0.1",
+    "sweetalert": "*",
     "Waves": "waves#~0.7.4",
     "angular": "1.4.7",
-    "angular-material": "^1.0.7"
+    "angular-material": "^1.0.7",
+    "pouchdb": "^5.3.1"
   }
 }

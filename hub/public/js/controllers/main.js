@@ -177,11 +177,12 @@ materialAdmin
 
     })
 
+
     // =========================================================================
     // Hub dashborad
     // =========================================================================
 
-    .controller('hubController', function ($scope, hubService, $mdDialog,$mdMedia,growlService) {
+    .controller('hubController', function ($scope, $state, hubService, $mdDialog, $mdMedia, growlService) {
 
         $scope.discover = function () {
             hubService.discover().then(function (result) {
@@ -194,91 +195,295 @@ materialAdmin
 
         $scope.discover();
 
-        $scope.$on('discover', function(){
+        $scope.$on('discover', function () {
             $scope.discover();
         })
-        
-        $scope.isEditing = false;
-
-        var addOrEditAgentDialogController = function($scope,$rootScope, $mdDialog){
-
-            $scope.agent={};
-
-            $scope.cancel = function(){
-                $mdDialog.cancel();
-            }
-
-            $scope.ok = function(agent){
 
 
-                if(!agent.ip){
-                    sweetAlert("Oops...", "IP cannot be empty!", "error");
-                    return;
-                }
-
-                if(/^(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])(\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])){3}$/.test(agent.ip)==false){
-                    sweetAlert("Oops...",'The format of IP is not correct!', 'error');
-                    return;
-                }
-
-                if(!agent.name){
-                    sweetAlert("Oops...",'Name cannot be empty.', 'error');
-                    return;
-                }
-
-                $mdDialog.hide();
-
-
-                if(!$scope.isEditing){
-
-                	hubService.createAgent(agent.ip,agent.name,agent.remark)
-                		.then(function(result){
-                			console.log(result);
-                			$rootScope.$broadcast('discover');
-                		},function(result){
-                            sweetAlert("Oops...Something wrong!(errorCode="+result.errorCode+")", result.errorMessage, "error");
-                		});
-                }
-            }
-
+        $scope.go = function (ip) {
+            $state.go('reader', {ip: ip});
         }
 
+
         $scope.addAgent = function (ev) {
-            var useFullScreen = ($mdMedia('sm') || $mdMedia('xs'))  && $scope.customFullscreen;
+            var useFullScreen = ($mdMedia('sm') || $mdMedia('xs')) && $scope.customFullscreen;
             $mdDialog.show({
-                    controller: addOrEditAgentDialogController,
-                    templateUrl: 'template/addOrEditAgentDialog.html',
-                    parent: angular.element(document.body),
-                    targetEvent: ev,
-                    clickOutsideToClose:true,
-                    fullscreen: useFullScreen
-                });
-            $scope.$watch(function() {
+                controller: "addOrEditAgentDialogController",
+                templateUrl: 'template/addOrEditAgentDialog.html',
+                parent: angular.element(document.body),
+                targetEvent: ev,
+                clickOutsideToClose: true,
+                fullscreen: useFullScreen,
+                locals: {'isEditing': false, 'agent': null}
+            });
+            $scope.$watch(function () {
                 return $mdMedia('xs') || $mdMedia('sm');
-            }, function(wantsFullScreen) {
+            }, function (wantsFullScreen) {
                 $scope.customFullscreen = (wantsFullScreen === true);
             });
         }
 
-        $scope.removeAgent = function(ip){
+        $scope.editAgent = function (ev, agent) {
+            var useFullScreen = ($mdMedia('sm') || $mdMedia('xs')) && $scope.customFullscreen;
+            $mdDialog.show({
+                controller: "addOrEditAgentDialogController",
+                templateUrl: 'template/addOrEditAgentDialog.html',
+                parent: angular.element(document.body),
+                targetEvent: ev,
+                clickOutsideToClose: true,
+                fullscreen: useFullScreen,
+                locals: {'isEditing': true, 'agent': agent}
+            });
+            $scope.$watch(function () {
+                return $mdMedia('xs') || $mdMedia('sm');
+            }, function (wantsFullScreen) {
+                $scope.customFullscreen = (wantsFullScreen === true);
+            });
+        }
 
-            swal({   title: "Are you sure?",
-                text: "You will not be able to recover this agent!",
-                type: "warning",   showCancelButton: true,
-                confirmButtonColor: "#DD6B55",
-                confirmButtonText: "Yes, delete it!",
-                closeOnConfirm: false },
-                function(){
-                    hubService.removeAgent(ip).then(function(){
-                        swal("Deleted!", "The reader agent("+ip+") has been deleted.", "success");
+        $scope.removeAgent = function (ip) {
+
+            swal({
+                    title: "Are you sure?",
+                    text: "You will not be able to recover this agent!",
+                    type: "warning", showCancelButton: true,
+                    confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "Yes, delete it!",
+                    closeOnConfirm: false
+                },
+                function () {
+                    hubService.removeAgent(ip).then(function () {
+                        swal("Deleted!", "The reader agent(" + ip + ") has been deleted.", "success");
                         $scope.discover();
-                    },function(result){
-                        sweetAlert("Oops...Something wrong!(errorCode="+result.errorCode+")", result.errorMessage, "error");
+                    }, function (result) {
+                        sweetAlert("Oops...Something wrong!(errorCode=" + result.errorCode + ")", result.errorMessage, "error");
                     })
                 });
         }
 
     })
 
+    // =========================================================================
+    // Add or edit agent dialog controller
+    // =========================================================================
+    .controller('addOrEditAgentDialogController', function ($scope, $rootScope, $mdDialog, hubService, isEditing, agent) {
 
+
+        if (isEditing) {
+            $scope.agent = agent;
+            $scope.isEditing = true;
+        } else {
+            $scope.agent = {};
+        }
+
+        $scope.cancel = function () {
+            $mdDialog.cancel();
+        }
+
+        $scope.ok = function (agent) {
+
+
+            if (!agent.ip) {
+                sweetAlert("Oops...", "IP cannot be empty!", "error");
+                return;
+            }
+
+            if (/^(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])(\.(\d{1,2}|1\d\d|2[0-4]\d|25[0-5])){3}$/.test(agent.ip) == false) {
+                sweetAlert("Oops...", 'The format of IP is not correct!', 'error');
+                return;
+            }
+
+            if (!agent.name) {
+                sweetAlert("Oops...", 'Name cannot be empty.', 'error');
+                return;
+            }
+
+            $mdDialog.hide();
+
+            if (!$scope.isEditing) {
+
+                hubService.createAgent(agent.ip, agent.name, agent.remark)
+                    .then(function (result) {
+                        console.log(result);
+                        $rootScope.$broadcast('discover');
+                    }, function (result) {
+                        sweetAlert("Oops...Something wrong!(errorCode=" + result.errorCode + ")", result.errorMessage, "error");
+                    });
+            } else {
+                hubService.updateAgent(agent.ip, agent.name, agent.remark)
+                    .then(function (result) {
+                        console.log(result);
+                        $rootScope.$broadcast('discover');
+                    }, function (result) {
+                        sweetAlert("Oops...Something wrong!(errorCode=" + result.errorCode + ")", result.errorMessage, "error");
+                    });
+            }
+        }
+    })
+    // =========================================================================
+    // Add or edit agent dialog controller
+    // =========================================================================
+    .controller('readerController', function ($scope, $stateParams, $timeout,growlService) {
+
+        $scope.ip = $stateParams.ip;
+        $scope.name = $stateParams.name;
+        $scope.current = null;
+        $scope.interval = -1;
+        $scope.isReading = false;
+        $scope.elapse = 0;
+
+        $scope.experiments = [];
+        $scope.focusOn = null;
+
+        var db = new PouchDB('tagsee');
+
+        $scope.load = function () {
+            db.query(function(doc){
+                if(doc.mode==0){
+                    emit(doc.id);
+                }
+            },{include_docs:true}).then(function(result){
+
+                $scope.experiments = [];
+
+                console.log(result);
+                result.rows.forEach(function(row){
+                    $scope.experiments.push(row.doc);
+                },function(result){
+                    console.log(result);
+                })
+
+                $scope.$apply();
+            })
+
+        }
+
+        $scope.load();
+
+        $scope.cleandb = function(){
+            swal({   title: "Are you sure to delete the database? ",
+                text: "All experiment records and readings will be deleted.",
+                type: "warning",   showCancelButton: true,   confirmButtonColor: "#DD6B55",
+                confirmButtonText: "Yes, delete it!",   closeOnConfirm: false },
+                function(){
+                    db.destroy().then(function(){
+                        db = new PouchDB('tagsee');
+                        $scope.load();
+                        swal("Deleted!", "The database is cleaned.", "success");
+
+                    })
+                })
+        }
+
+
+        $scope.focus = function(experiment){
+            $scope.focusOn = experiment;
+            for(var i=0;i<$scope.experiments.length;i++){
+                $scope.experiments[i].current = false;
+            }
+            $scope.focusOn.current = true;
+            growlService.growl('Focus on experiment ('+experiment.marker+')', 'success');
+        }
+
+        $scope.startTimer = function(){
+            $timeout(function(){
+                $scope.elapse = $scope.elapse+1;
+                if($scope.isReading){
+                    $scope.startTimer();
+                }
+            },1000);
+        }
+
+        $scope.discard = function(experiment){
+
+            swal({title: "Are you sure? ",
+                    text: "All readings related to this experiment will be deleted.",
+                    type: "warning",   showCancelButton: true,   confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "Yes, delete it!",   closeOnConfirm: false },
+                function(){
+                    console.log(experiment);
+                    db.remove(experiment._id,experiment._rev,function(){
+                        $scope.load();
+                        swal("Deleted!", "This experiment is deleted.", "success");
+                    })
+                })
+        }
+
+        $scope.start = function (interval) {
+
+            if($scope.isReading){
+                swal("It's reading!", "Please finish current experiment firstly.", "warning");
+                return;
+            }
+
+            $scope.current = {};
+            var terminated = false;
+
+            swal({
+                    title: "Give an marker to this experiment.", text: "Marker:",
+                    type: "input", showCancelButton: true,
+                    closeOnConfirm: true, animation: "slide-from-top",
+                    inputPlaceholder: "Experiment marker"
+                },
+                function (inputValue) {
+                    if (inputValue === false){
+                        return false;
+                    }
+                    if(!inputValue){
+                        inputValue = "Unknown";
+                    }
+                    $scope.current.marker = inputValue;
+
+
+                    if (interval <0) {
+                        //TODO handle the customized interval
+                    }else if(interval>0){
+                        $scope.current.startTime = new Date().getTime();
+                        $scope.interval = interval;
+                        $scope.isReading = true;
+                        $scope.elapse = 0;
+                        $scope.startTimer();
+                        $timeout(function(){
+                            $scope.stop();
+                        },interval*1000);
+                    }else{
+                        $scope.isReading = true;
+                        $scope.elapse = 0;
+                        $scope.startTimer();
+                        $scope.current.startTime = new Date().getTime();
+                    }
+                });
+
+
+        }
+
+        $scope.stop = function(){
+            $scope.current.endTime = new Date().getTime();
+            $scope.isReading = false;
+            $scope.current.interval = $scope.current.endTime - $scope.current.startTime;
+            $scope.current.amount = 0;
+            $scope.current.mode = 0;
+            $scope.current.ip = $scope.ip;
+            db.post($scope.current).then(function(result){
+                console.log(result);
+                $scope.current.id = result.id;
+                $scope.load();
+
+            },function(result){
+                sweetAlert("Oops...Something wrong!", result, "error");
+            });
+        }
+
+        $scope.filterExperiment = function(experiment){
+
+            if(experiment.current) return true;
+
+            var result = experiment.ip === $scope.ip;
+            if($scope.expFilter && experiment.marker){
+                result &= experiment.marker.toLowerCase().indexOf($scope.expFilter.toLowerCase())>=0
+            }
+            return result;
+        }
+
+    })
 
