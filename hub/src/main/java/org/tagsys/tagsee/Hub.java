@@ -15,13 +15,31 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
+import org.apache.log4j.Logger;
+import org.eclipse.jetty.websocket.api.Session;
+import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import org.llrp.ltk.exceptions.InvalidLLRPMessageException;
+import org.llrp.ltk.generated.custom.parameters.ImpinjPeakRSSI;
+import org.llrp.ltk.generated.custom.parameters.ImpinjRFPhaseAngle;
+import org.llrp.ltk.generated.messages.READER_EVENT_NOTIFICATION;
+import org.llrp.ltk.generated.messages.RO_ACCESS_REPORT;
+import org.llrp.ltk.generated.parameters.Custom;
+import org.llrp.ltk.generated.parameters.EPCData;
+import org.llrp.ltk.generated.parameters.EPC_96;
+import org.llrp.ltk.generated.parameters.TagReportData;
 import org.llrp.ltk.net.LLRPConnectionAttemptFailedException;
+import org.llrp.ltk.net.LLRPEndpoint;
+import org.llrp.ltk.types.LLRPMessage;
+import org.llrp.ltk.types.LLRPParameter;
+import org.llrp.ltk.types.UnsignedLong;
+import org.llrp.ltk.types.UnsignedShort;
 
 import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
@@ -31,12 +49,14 @@ import spark.Request;
 import spark.Response;
 import spark.utils.StringUtils;
 
-public class Hub {
+
+public class Hub implements LLRPEndpoint {
 	// storing all agents
 	private Map<String, Agent> agents = new HashMap<String, Agent>();
 	private Gson gson = new Gson();
-	
-	
+	private static Logger logger = Logger.getLogger(Agent.class);
+	protected static List<Session> sessions = new ArrayList<Session>();
+
 	public Hub(){
 		
 		try {
@@ -211,7 +231,7 @@ public class Hub {
 		Agent agent = agents.get(agentIP);
 
 		try {
-			agent.connect();
+			agent.connect(this);
 			return result;
 		} catch (Exception e) {
 			result.setErrorCode(1013);
@@ -248,7 +268,7 @@ public class Hub {
 
 		formatResponse(resp);
 
-		String agentIP = req.queryParams("agentIP");
+		String agentIP = req.params("agentIP");
 
 		Agent agent = agents.get(agentIP);
 
@@ -263,19 +283,29 @@ public class Hub {
 	public JsonResult startAgent(Request req, Response resp) {
 
 		formatResponse(resp);
-
-		String agentIP = req.queryParams("agentIP");
+		
+		String agentIP = req.params(":ip");
 
 		Agent agent = agents.get(agentIP);
+		
+		System.out.println(agentIP);
 
 		if (agent == null) {
 			return new JsonResult(1003);
 		}
 		try {
-			if (agent.getStatus() == 0) {
-				agent.connect();
+			agent.connect(this);
+			agent.enableImpinjExtensions();
+			agent.deleteROSpecs();
+			if(!agent.addRoSpec(true)){
+				return new JsonResult(1005,"It fails to add ROSpec.");
 			}
-			agent.start();
+			if(!agent.enable()){
+				return new JsonResult(1005,"It fails to enable the reader.");
+			};
+			if(!agent.start()){
+				return new JsonResult(1005);
+			}
 			return new JsonResult(0);
 		} catch (LLRPConnectionAttemptFailedException e) {
 			e.printStackTrace();
@@ -293,7 +323,7 @@ public class Hub {
 
 		formatResponse(resp);
 
-		String agentIP = req.queryParams("agentIP");
+		String agentIP = req.params(":ip");
 
 		Agent agent = agents.get(agentIP);
 
@@ -303,12 +333,136 @@ public class Hub {
 
 		try {
 			agent.stop();
+			agent.disconnect();
 			return new JsonResult(0);
 		} catch (TimeoutException | InvalidLLRPMessageException e) {
 			e.printStackTrace();
 			return new JsonResult(1013, e.getMessage());
 		}
 
+	}
+	
+	 public static void broadcast(String message){
+	    	sessions.stream().filter(Session::isOpen).forEach(session->{
+	    		try {
+					session.getRemote().sendString(message);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+	    	});
+	    }
+	
+	public Tag logOneTagReport(TagReportData tr) {
+		
+		Tag tag = new Tag();
+		
+		tag.setTimestamp(new Date().getTime());
+
+		LLRPParameter epcp = (LLRPParameter) tr.getEPCParameter();
+
+		// epc is not optional, so we should fail if we can't find it
+		String epcString = "EPC: ";
+		if (epcp != null) {
+			if (epcp.getName().equals("EPC_96")) {
+				EPC_96 epc96 = (EPC_96) epcp;
+				epcString += epc96.getEPC().toString();
+				tag.setEpc(epc96.getEPC().toString());
+			} else if (epcp.getName().equals("EPCData")) {
+				EPCData epcData = (EPCData) epcp;
+				epcString += epcData.getEPC().toString();
+				tag.setData(epcData.getEPC().toString());
+			}
+		} else {
+			logger.error("Could not find EPC in Tag Report");
+			return null;
+		}
+
+		// all of these values are optional, so check their non-nullness first
+		if (tr.getAntennaID() != null) {
+			epcString += " Antenna: " + tr.getAntennaID().getAntennaID().toString();
+			tag.setAntenna(tr.getAntennaID().getAntennaID().intValue());
+		}
+
+		if (tr.getChannelIndex() != null) {
+			epcString += " ChanIndex: " + tr.getChannelIndex().getChannelIndex().toString();
+			tag.setChannel(tr.getChannelIndex().getChannelIndex().intValue());
+		}
+
+		if (tr.getFirstSeenTimestampUTC() != null) {
+			epcString += " FirstSeen: " + tr.getFirstSeenTimestampUTC().getMicroseconds().toString();
+			tag.setFirstSeenTime(tr.getFirstSeenTimestampUTC().getMicroseconds().toLong());
+		}
+
+		if (tr.getInventoryParameterSpecID() != null) {
+			epcString += " ParamSpecID: " + tr.getInventoryParameterSpecID().getInventoryParameterSpecID().toString();
+		}
+
+		if (tr.getLastSeenTimestampUTC() != null) {
+			tag.setLastSeenTime(tr.getLastSeenTimestampUTC().getMicroseconds().toLong());
+		}
+
+		if (tr.getPeakRSSI() != null) {
+			tag.setRssi(tr.getPeakRSSI().getPeakRSSI().intValue());
+		}
+
+		if (tr.getROSpecID() != null) {
+			epcString += " ROSpecID: " + tr.getROSpecID().getROSpecID().toString();
+		}
+
+		if (tr.getTagSeenCount() != null) {
+			tag.setSeenCount(tr.getTagSeenCount().getTagCount().intValue());
+		}
+
+		List<Custom> clist = tr.getCustomList();
+
+		for (Custom cd : clist) {
+			if (cd.getClass() == ImpinjRFPhaseAngle.class) {
+				epcString += " ImpinjPhase: " + ((ImpinjRFPhaseAngle) cd).getPhaseAngle().toString();
+				tag.setPhase(((ImpinjRFPhaseAngle) cd).getPhaseAngle().toInteger().intValue());
+			}
+			if (cd.getClass() == ImpinjPeakRSSI.class) {
+				tag.setPeekRssi(((ImpinjPeakRSSI) cd).getRSSI().intValue());
+			}
+
+		}
+
+		logger.info(epcString);
+		
+		return tag;
+
+	}
+
+	@Override
+	public void messageReceived(LLRPMessage message) {
+	
+		logger.debug("Received " + message.getName() + " message asychronously");
+
+		if (message.getTypeNum() == RO_ACCESS_REPORT.TYPENUM) {
+			RO_ACCESS_REPORT report = (RO_ACCESS_REPORT) message;
+
+			List<TagReportData> tdlist = report.getTagReportDataList();
+
+			List<Tag> list = new ArrayList<Tag>();
+			Tag tag = null;
+			for (TagReportData tr : tdlist) {
+				tag = logOneTagReport(tr);
+				if(tag!=null){
+					list.add(logOneTagReport(tr));
+				}
+			}
+			
+			JsonResult result = new JsonResult();
+			result.put("tags",list);
+			broadcast(result.toString());
+			
+		} else if (message.getTypeNum() == READER_EVENT_NOTIFICATION.TYPENUM) {
+			// TODO
+		}
+	}
+	
+	@Override
+	public void errorOccured(String s) {
+		logger.error(s);
 	}
 
 }

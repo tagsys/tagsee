@@ -101,14 +101,104 @@ materialAdmin
         }
 
         service.startAgent = function(ip){
-            
+            return utilService.get("service/agent/"+ip+"/start");
         }
         
     
 
         return service;
     })
+    .service('expService',function(){
 
+        var service = {
+             db : new PouchDB('tagsee')
+        };
+
+        var startTimer = function(exp){
+            $timeout(function(){
+                exp.elapse = exp.elapse+1;
+                if(exp.interval>0 && exp.elapse>exp.interval){
+                    service.end();
+                }
+                if(exp.isReading){
+                    startTimer(exp);
+                }
+            },1000);
+        }
+
+        service.begin = function(ip,marker,interval){
+            var exp = {
+                ip: ip,
+                marker:marker,
+                startTime: new Date().getTime(),
+                interval:interval,
+                isReading:true,
+                elapse: 0, // time for the experiment.
+                mode: 0 // experiment or reading.
+            };
+
+            db.post(exp).then(function(result){
+                exp._id = result.id;
+                exp._rev = result.rev;
+                $scope.current = exp;
+                $scope.load();
+                startTimer(exp);
+            },function(result){
+                exp.errorCode = result.errorCode;
+                sweetAlert("Oops...Something wrong!", result, "error");
+            });
+        }
+
+        service.end = function(exp, cb){
+            exp.isReading = false;
+            exp.endTime = new Date().getTime();
+            db.post( exp).then(function(result){
+                if(cb) cb();
+            },function(result){
+                sweetAlert("Oops...Something wrong!", result, "error");
+            });
+        }
+
+        service.query = function(cb, pageIndex, pageSize){
+
+        }
+
+        service.discard = function(exp, cb){
+            swal({title: "Are you sure? ",
+                    text: "All readings related to this experiment will be deleted.",
+                    type: "warning",   showCancelButton: true,   confirmButtonColor: "#DD6B55",
+                    confirmButtonText: "Yes, delete it!",   closeOnConfirm: false },
+                function(){
+                    db.remove(exp._id,exp._rev,function(){
+                        $scope.load();
+                        swal("Deleted!", "This experiment is deleted.", "success");
+                    })
+                })
+        }
+
+        return service;
+    })
+    .service('readService', function(){
+
+        var service = {
+            db : new PouchDB('tagsee')
+        };
+
+        service.addRead = function(exp,tag){
+
+        }
+
+        service.download = function(expId){
+
+        }
+
+        service.query = function(expId){
+
+        }
+
+        return service;
+
+    })
     // =========================================================================
     // Header Messages and Notifications list Data
     // =========================================================================

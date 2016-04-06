@@ -31,7 +31,7 @@ import org.llrp.ltk.exceptions.InvalidLLRPMessageException;
 import org.llrp.ltk.generated.custom.messages.*;
 import org.llrp.ltk.generated.custom.parameters.*;
 
-public class Agent implements LLRPEndpoint {
+public class Agent{
 
 	private transient LLRPConnection connection;
 
@@ -51,7 +51,7 @@ public class Agent implements LLRPEndpoint {
 
 	private transient ROSpec rospec;
 	
-	private transient int MessageID = 23; // a random starting point
+	private transient int MessageID = (int)Math.floor(Math.random()*50); // a random starting point
 	
 	@Expose(serialize=false)
 	private UnsignedInteger modelName;
@@ -69,7 +69,7 @@ public class Agent implements LLRPEndpoint {
 	UnsignedShort hopTableID;
 
 	private UnsignedInteger getUniqueMessageID() {
-		return new UnsignedInteger(MessageID++);
+		return new UnsignedInteger(MessageID);
 	}
 
 	public Agent(String ip) {
@@ -117,10 +117,10 @@ public class Agent implements LLRPEndpoint {
 		this.lastUpdatedTime = time;
 	}
 
-	public boolean connect() throws LLRPConnectionAttemptFailedException {
+	public boolean connect(LLRPEndpoint endpoint) throws LLRPConnectionAttemptFailedException {
 		// create client-initiated LLRP connection
 
-		connection = new LLRPConnector(this, this.ip);
+		connection = new LLRPConnector(endpoint, this.ip);
 
 		// connect to reader
 		// LLRPConnector.connect waits for successful
@@ -165,7 +165,7 @@ public class Agent implements LLRPEndpoint {
 		}
 	}
 
-	public void enableImpinjExtensions() {
+	public boolean enableImpinjExtensions() {
 		LLRPMessage response;
 
 		try {
@@ -181,18 +181,19 @@ public class Agent implements LLRPEndpoint {
 			} else {
 				logger.info(response.toXMLString());
 				logger.info("IMPINJ_ENABLE_EXTENSIONS Failure");
-				System.exit(1);
+				return false;
 			}
+			return true;
 		} catch (InvalidLLRPMessageException ex) {
 			logger.error("Could not process IMPINJ_ENABLE_EXTENSIONS response");
-			System.exit(1);
+			return false;
 		} catch (TimeoutException ex) {
 			logger.error("Timeout Waiting for IMPINJ_ENABLE_EXTENSIONS response");
-			System.exit(1);
+			return false;
 		}
 	}
 
-	public void factoryDefault() {
+	public boolean factoryDefault() {
 		LLRPMessage response;
 
 		try {
@@ -210,12 +211,13 @@ public class Agent implements LLRPEndpoint {
 			} else {
 				logger.info(response.toXMLString());
 				logger.info("SET_READER_CONFIG Factory Default Failure");
-				System.exit(1);
+				return false;
 			}
 
+			return true;
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.exit(1);
+			return false;
 		}
 	}
 
@@ -388,16 +390,12 @@ public class Agent implements LLRPEndpoint {
 			return (ADD_ROSPEC) addRospec;
 		} catch (FileNotFoundException ex) {
 			logger.error("Could not find file");
-			System.exit(1);
 		} catch (IOException ex) {
 			logger.error("IO Exception on file");
-			System.exit(1);
 		} catch (JDOMException ex) {
 			logger.error("Unable to convert LTK-XML to DOM");
-			System.exit(1);
 		} catch (InvalidLLRPMessageException ex) {
 			logger.error("Unable to convert LTK-XML to Internal Object");
-			System.exit(1);
 		}
 		return null;
 	}
@@ -442,6 +440,7 @@ public class Agent implements LLRPEndpoint {
 			addRospec = buildROSpecFromObjects();
 		}
 
+
 		addRospec.setMessageID(getUniqueMessageID());
 		rospec = addRospec.getROSpec();
 
@@ -461,6 +460,29 @@ public class Agent implements LLRPEndpoint {
 		}
 
 	}
+	
+	// Delete all ROSpecs from the reader.
+    public boolean deleteROSpecs()
+    {
+        DELETE_ROSPEC_RESPONSE response;
+         
+        logger.info("Deleting all ROSpecs.");
+        DELETE_ROSPEC del = new DELETE_ROSPEC();
+        // Use zero as the ROSpec ID. 
+        // This means delete all ROSpecs.
+        del.setROSpecID(new UnsignedInteger(0));
+        try{
+            response = (DELETE_ROSPEC_RESPONSE) connection.transact(del, 10000);
+            logger.info(response.toXMLString());
+            return true;
+        } 
+        catch (Exception e) 
+        {
+            logger.info("Error deleting ROSpec.");
+            e.printStackTrace();
+            return false;
+        }
+    }
 
 	public boolean enable() throws TimeoutException, InvalidLLRPMessageException {
 		LLRPMessage response;
@@ -487,11 +509,9 @@ public class Agent implements LLRPEndpoint {
 	}
 
 	public boolean start() throws TimeoutException, InvalidLLRPMessageException {
+		
 		LLRPMessage response;
 
-		this.setReaderConfiguration();
-		this.addRoSpec(true);
-		this.enable();
 		this.status = 2;
 
 		logger.info("START_ROSPEC ...");
@@ -520,6 +540,11 @@ public class Agent implements LLRPEndpoint {
 		this.status = 1;
 		logger.info("STOP_ROSPEC ...");
 		STOP_ROSPEC stop = new STOP_ROSPEC();
+		
+		if(rospec==null){
+			return false;
+		}
+		
 		stop.setMessageID(getUniqueMessageID());
 		stop.setROSpecID(rospec.getROSpecID());
 
@@ -538,167 +563,5 @@ public class Agent implements LLRPEndpoint {
 
 	}
 
-	public void logOneCustom(Custom cust) {
 
-		String output = "";
-		if (!cust.getVendorIdentifier().equals(25882)) {
-			logger.error("Non Impinj Extension Found in message");
-			return;
-		}
-	}
-
-	public void logOneTagReport(TagReportData tr) {
-
-		String lastEPCData;
-		UnsignedShort lastAntennaID;
-		UnsignedShort lastChannelIndex;
-		UnsignedLong lastReadTime;
-		String currentEPCData;
-		UnsignedShort currentAntennaID;
-		UnsignedShort currentChannelIndex;
-		UnsignedLong currentReadTime;
-		double lastRfPhase;
-		double currentRfPhase;
-
-		LLRPParameter epcp = (LLRPParameter) tr.getEPCParameter();
-
-		// epc is not optional, so we should fail if we can't find it
-		String epcString = "EPC: ";
-		if (epcp != null) {
-			if (epcp.getName().equals("EPC_96")) {
-				EPC_96 epc96 = (EPC_96) epcp;
-				epcString += epc96.getEPC().toString();
-				currentEPCData = epc96.getEPC().toString();
-			} else if (epcp.getName().equals("EPCData")) {
-				EPCData epcData = (EPCData) epcp;
-				epcString += epcData.getEPC().toString();
-				currentEPCData = epcData.getEPC().toString();
-			}
-		} else {
-			logger.error("Could not find EPC in Tag Report");
-			System.exit(1);
-		}
-
-		// all of these values are optional, so check their non-nullness first
-		if (tr.getAntennaID() != null) {
-			epcString += " Antenna: " + tr.getAntennaID().getAntennaID().toString();
-			currentAntennaID = tr.getAntennaID().getAntennaID();
-		}
-
-		if (tr.getChannelIndex() != null) {
-			epcString += " ChanIndex: " + tr.getChannelIndex().getChannelIndex().toString();
-			currentChannelIndex = tr.getChannelIndex().getChannelIndex();
-		}
-
-		if (tr.getFirstSeenTimestampUTC() != null) {
-			epcString += " FirstSeen: " + tr.getFirstSeenTimestampUTC().getMicroseconds().toString();
-			currentReadTime = tr.getFirstSeenTimestampUTC().getMicroseconds();
-		}
-
-		if (tr.getInventoryParameterSpecID() != null) {
-			epcString += " ParamSpecID: " + tr.getInventoryParameterSpecID().getInventoryParameterSpecID().toString();
-		}
-
-		if (tr.getLastSeenTimestampUTC() != null) {
-			epcString += " LastTime: " + tr.getLastSeenTimestampUTC().getMicroseconds().toString();
-		}
-
-		if (tr.getPeakRSSI() != null) {
-			epcString += " RSSI: " + tr.getPeakRSSI().getPeakRSSI().toString();
-		}
-
-		if (tr.getROSpecID() != null) {
-			epcString += " ROSpecID: " + tr.getROSpecID().getROSpecID().toString();
-		}
-
-		if (tr.getTagSeenCount() != null) {
-			epcString += " SeenCount: " + tr.getTagSeenCount().getTagCount().toString();
-		}
-
-		List<Custom> clist = tr.getCustomList();
-
-		for (Custom cd : clist) {
-			if (cd.getClass() == ImpinjRFPhaseAngle.class) {
-				epcString += " ImpinjPhase: " + ((ImpinjRFPhaseAngle) cd).getPhaseAngle().toString();
-				currentRfPhase = ((ImpinjRFPhaseAngle) cd).getPhaseAngle().toInteger();
-			}
-			if (cd.getClass() == ImpinjPeakRSSI.class) {
-				epcString += " ImpinjPeakRSSI: " + ((ImpinjPeakRSSI) cd).getRSSI().toString();
-			}
-
-		}
-
-		System.out.println(epcString);
-		// logger.debug(output);
-
-	}
-
-	// messageReceived method is called whenever a message is received
-	// asynchronously on the LLRP connection.
-	public void messageReceived(LLRPMessage message) {
-		// convert all messages received to LTK-XML representation
-		// and print them to the console
-
-		logger.debug("Received " + message.getName() + " message asychronously");
-
-		if (message.getTypeNum() == RO_ACCESS_REPORT.TYPENUM) {
-			RO_ACCESS_REPORT report = (RO_ACCESS_REPORT) message;
-
-			List<TagReportData> tdlist = report.getTagReportDataList();
-
-			for (TagReportData tr : tdlist) {
-				logOneTagReport(tr);
-			}
-
-			List<Custom> clist = report.getCustomList();
-			for (Custom cust : clist) {
-				logOneCustom(cust);
-			}
-
-		} else if (message.getTypeNum() == READER_EVENT_NOTIFICATION.TYPENUM) {
-			// TODO
-		}
-	}
-
-	public void errorOccured(String s) {
-		logger.error(s);
-	}
-
-	/**
-	 * @param args
-	 */
-	public static void main(String[] args) {
-		
-		Gson g = new Gson();
-		System.out.println(g.toJson(new Agent("dddd")));
-		
-		// BasicConfigurator.configure();
-		//
-		// // Only show root events from the base logger
-		// Logger.getRootLogger().setLevel(Level.ERROR);
-		// Agent example = new Agent();
-		// logger.setLevel(Level.INFO);
-		//
-		// if (args.length < 1) {
-		// System.out.print("Must pass reader hostname or IP as agument 1");
-		// }
-		//
-		// example.connect(args[0]);
-		// example.enableImpinjExtensions();
-		// example.factoryDefault();
-		// example.getReaderCapabilities();
-		// example.getReaderConfiguration();
-		// example.setReaderConfiguration();
-		// example.addRoSpec(true);
-		// example.enable();
-		// example.start();
-		// try {
-		// Thread.sleep(20000);
-		// } catch (InterruptedException ex) {
-		// logger.error("Sleep Interrupted");
-		// }
-		// example.stop();
-		// example.disconnect();
-		// System.exit(0);
-	}
 }

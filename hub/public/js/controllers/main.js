@@ -322,15 +322,11 @@ materialAdmin
     // =========================================================================
     .controller('readerController', function ($scope, $stateParams, $timeout,growlService) {
 
-        $scope.ip = $stateParams.ip;
         $scope.name = $stateParams.name;
+        $scope.ip = $stateParams.ip;
         $scope.current = null;
-        $scope.interval = -1;
-        $scope.isReading = false;
-        $scope.elapse = 0;
-
         $scope.experiments = [];
-        $scope.focusOn = null;
+        $scope.focused = null;
 
         var db = new PouchDB('tagsee');
 
@@ -374,22 +370,10 @@ materialAdmin
 
 
         $scope.focus = function(experiment){
-            $scope.focusOn = experiment;
-            for(var i=0;i<$scope.experiments.length;i++){
-                $scope.experiments[i].current = false;
-            }
-            $scope.focusOn.current = true;
-            growlService.growl('Focus on experiment ('+experiment.marker+')', 'success');
+            $scope.focused = experiment;
         }
 
-        $scope.startTimer = function(){
-            $timeout(function(){
-                $scope.elapse = $scope.elapse+1;
-                if($scope.isReading){
-                    $scope.startTimer();
-                }
-            },1000);
-        }
+
 
         $scope.discard = function(experiment){
 
@@ -406,6 +390,42 @@ materialAdmin
                 })
         }
 
+        var startTimer = function(exp){
+            $timeout(function(){
+                exp.elapse = exp.elapse+1;
+                if(exp.interval>0 && exp.elapse>exp.interval){
+                    $scope.stop();
+                }
+                if(exp.isReading){
+                    startTimer(exp);
+                }
+            },1000);
+        }
+
+        var beginExperiment = function(marker, interval){
+            var exp = {
+                ip: $stateParams.ip,
+                marker:marker,
+                startTime: new Date().getTime(),
+                interval:interval,
+                isReading:true,
+                elapse: 0, // time for the experiment.
+                mode: 0 // experiment or reading.
+            };
+
+            db.post(exp).then(function(result){
+                exp._id = result.id;
+                exp._rev = result.rev;
+                $scope.current = exp;
+                $scope.load();
+                startTimer(exp);
+            },function(result){
+                exp.errorCode = result.errorCode;
+                sweetAlert("Oops...Something wrong!", result, "error");
+            });
+        }
+
+
         $scope.start = function (interval) {
 
             if($scope.isReading){
@@ -417,55 +437,32 @@ materialAdmin
             var terminated = false;
 
             swal({
-                    title: "Give a marker to this experiment.", 
+                    title: "Give a marker to identify this experiment.",
                     type: "input", showCancelButton: true,
                     closeOnConfirm: true, animation: "slide-from-top",
-                    inputPlaceholder: "Experiment marker"
+                    inputPlaceholder: "Experiment identifier",
+                    inputValue : "exp-"+ Math.floor(Math.random()*10000)
                 },
                 function (inputValue) {
+
                     if (inputValue === false){
                         return false;
                     }
                     if(!inputValue){
-                        inputValue = "Unknown";
+                        inputValue = "exp-"+ Math.floor(Math.random()*10000);
                     }
-                    $scope.current.marker = inputValue;
 
-
-                    if (interval <0) {
-                        //TODO handle the customized interval
-                    }else if(interval>0){
-                        $scope.current.startTime = new Date().getTime();
-                        $scope.interval = interval;
-                        $scope.isReading = true;
-                        $scope.elapse = 0;
-                        $scope.startTimer();
-                        $timeout(function(){
-                            $scope.stop();
-                        },interval*1000);
-                    }else{
-                        $scope.isReading = true;
-                        $scope.elapse = 0;
-                        $scope.startTimer();
-                        $scope.current.startTime = new Date().getTime();
-                    }
+                    beginExperiment(inputValue,interval);
                 });
 
 
         }
 
         $scope.stop = function(){
+            $scope.current.isReading = false;
             $scope.current.endTime = new Date().getTime();
-            $scope.isReading = false;
-            $scope.current.interval = $scope.current.endTime - $scope.current.startTime;
-            $scope.current.amount = 0;
-            $scope.current.mode = 0;
-            $scope.current.ip = $scope.ip;
-            db.post($scope.current).then(function(result){
-                console.log(result);
-                $scope.current.id = result.id;
+            db.post( $scope.current).then(function(result){
                 $scope.load();
-
             },function(result){
                 sweetAlert("Oops...Something wrong!", result, "error");
             });
@@ -473,9 +470,10 @@ materialAdmin
 
         $scope.filterExperiment = function(experiment){
 
-            if(experiment.current) return true;
+            //always show the current experiment.
+            if($scope.current && experiment._id==$scope.current._id) return true;
 
-            var result = experiment.ip === $scope.ip;
+            var result = experiment.ip === $stateParams.ip;
             if($scope.expFilter && experiment.marker){
                 result &= experiment.marker.toLowerCase().indexOf($scope.expFilter.toLowerCase())>=0
             }
