@@ -62,8 +62,11 @@ public class Hub {
 		Agent[] agents = new Gson().fromJson(reader, Agent[].class);
 		
 		this.agents.clear();
-		for(Agent a: agents){
-			this.agents.put(a.getIP(),a);
+		if(agents!=null)
+		{
+			for(Agent a: agents){
+				this.agents.put(a.getIP(),a);
+			}
 		}
 	}
 	

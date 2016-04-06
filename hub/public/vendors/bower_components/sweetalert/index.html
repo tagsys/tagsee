@@ -6,7 +6,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0" />
   <title>SweetAlert</title>
-  
+
   <link rel="stylesheet" href="example/example.css">
   <script src="https://code.jquery.com/jquery-2.1.3.min.js"></script>
 
@@ -189,6 +189,26 @@
 });</pre>
 	</li>
 
+  <li class="ajax">
+    <div class="ui">
+			<p>With a loader (for AJAX request for example)</p>
+			<button>Try me!</button>
+		</div>
+		<pre><span class="attr">swal</span>({
+&nbsp;&nbsp;title: <span class="str">"Ajax request example"</span>,
+&nbsp;&nbsp;text: <span class="str">"Submit to run ajax request"</span>,
+&nbsp;&nbsp;type: <span class="str">"info"</span>,
+&nbsp;&nbsp;showCancelButton: <span class="val">true</span>,
+&nbsp;&nbsp;closeOnConfirm: <span class="val">false</span>,
+&nbsp;&nbsp;showLoaderOnConfirm: <span class="val">true</span>,
+},
+<span class="func"><i>function</i></span>(){
+&nbsp;&nbsp;<span class="attr">setTimeout</span>(<span class="func"><i>function</i></span>(){
+&nbsp;&nbsp;&nbsp;&nbsp;<span class="attr">swal</span>(<span class="str">"Ajax request finished!"</span>);
+&nbsp;&nbsp;}, <span class="val">2000</span>);
+});</pre>
+	</li>
+
 	<li class="theme">
 		<div class="ui">
 			<p>You can also change the theme of SweetAlert!</p>
@@ -344,7 +364,7 @@
 	<tr>
 		<td><b>animation</b></td>
 		<td><i>true</i></td>
-		<td>If set to <strong>false</strong>, the modal's animation will be disabled.</td>
+		<td>If set to <strong>false</strong>, the modal's animation will be disabled. Possible (string) values : <strong>pop</strong> (default when animation set to true), <strong>slide-from-top</strong>, <strong>slide-from-bottom</strong></td>
 	</tr>
 	<tr>
 		<td><b>inputType</b></td>
@@ -360,6 +380,11 @@
 		<td><b>inputValue</b></td>
 		<td><i>null</i></td>
 		<td>Specify a default text value that you want your input to show when using <strong>type: "input"</strong></td>
+	</tr>
+	<tr>
+		<td><b>showLoaderOnConfirm</b></td>
+		<td><i>false</i></td>
+    <td>Set to <strong>true</strong> to disable the buttons and show that something is loading.</td>
 	</tr>
 </table>
 
@@ -395,6 +420,11 @@
 		<td>showInputError</td>
 		<td><i>swal.showInputError("Invalid email!");</i></td>
 		<td>Show an error message after validating the input field, if the user's data is bad</td>
+	</tr>
+	<tr>
+		<td>enableButtons, disableButtons</td>
+		<td><i>swal.disableButtons();</i></td>
+		<td>Disable or enable the user to click on the cancel and confirm buttons.</td>
 	</tr>
 </table>
 
@@ -506,8 +536,8 @@ document.querySelector('ul.examples li.input button').onclick = function(){
 		showCancelButton: true,
 		closeOnConfirm: false,
 		animation: "slide-from-top",
-		inputPlaceholder: "Write something"
-	}, 
+		inputPlaceholder: "Write something",
+	},
 	function(inputValue){
 		if (inputValue === false) return false;
 
@@ -515,9 +545,9 @@ document.querySelector('ul.examples li.input button').onclick = function(){
 			swal.showInputError("You need to write something!");
 			return false;
 		}
-		
+    
 		swal("Nice!", 'You wrote: ' + inputValue, "success");
-		
+
 	});
 };
 
@@ -528,6 +558,21 @@ document.querySelector('ul.examples li.theme button').onclick = function() {
 		confirmButtonText: "Cool!",
 		customClass: 'twitter'
 	});
+};
+
+document.querySelector('ul.examples li.ajax button').onclick = function() {
+  swal({
+    title: 'Ajax request example',
+    text: 'Submit to run ajax request',
+    type: 'info',
+    showCancelButton: true,
+    closeOnConfirm: false,
+    showLoaderOnConfirm: true,
+  }, function(){
+    setTimeout(function() {
+      swal('Ajax request finished!');
+    }, 2000);
+  });
 };
 
 </script>

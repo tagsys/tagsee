@@ -182,7 +182,7 @@ materialAdmin
     // Hub dashborad
     // =========================================================================
 
-    .controller('hubController', function ($scope, $state, hubService, $mdDialog, $mdMedia, growlService) {
+    .controller('hubController', function ($scope, $state, hubService, $uibModal, growlService) {
 
         $scope.discover = function () {
             hubService.discover().then(function (result) {
@@ -200,45 +200,42 @@ materialAdmin
         })
 
 
-        $scope.go = function (ip) {
-            $state.go('reader', {ip: ip});
+        $scope.go = function (params) {
+            $state.go('reader', params,{reload: true, notify: true});
         }
 
-
         $scope.addAgent = function (ev) {
-            var useFullScreen = ($mdMedia('sm') || $mdMedia('xs')) && $scope.customFullscreen;
-            $mdDialog.show({
-                controller: "addOrEditAgentDialogController",
-                templateUrl: 'template/addOrEditAgentDialog.html',
-                parent: angular.element(document.body),
-                targetEvent: ev,
-                clickOutsideToClose: true,
-                fullscreen: useFullScreen,
-                locals: {'isEditing': false, 'agent': null}
-            });
-            $scope.$watch(function () {
-                return $mdMedia('xs') || $mdMedia('sm');
-            }, function (wantsFullScreen) {
-                $scope.customFullscreen = (wantsFullScreen === true);
-            });
+        	
+        	var modalInstance = $uibModal.open({
+        	      templateUrl: 'template/addOrEditAgentDialog.html',
+        	      controller: 'addOrEditAgentDialogController',
+        	      resolve: {
+        	        isEditing: function () {
+        	          return false;
+        	        },
+        	        agent: function(){
+        	        	return null;
+        	        }
+        	      }
+        	    });
         }
 
         $scope.editAgent = function (ev, agent) {
-            var useFullScreen = ($mdMedia('sm') || $mdMedia('xs')) && $scope.customFullscreen;
-            $mdDialog.show({
-                controller: "addOrEditAgentDialogController",
+
+
+            var modalInstance = $uibModal.open({
                 templateUrl: 'template/addOrEditAgentDialog.html',
-                parent: angular.element(document.body),
-                targetEvent: ev,
-                clickOutsideToClose: true,
-                fullscreen: useFullScreen,
-                locals: {'isEditing': true, 'agent': agent}
+                controller: 'addOrEditAgentDialogController',
+                resolve: {
+                    isEditing: function () {
+                        return true;
+                    },
+                    agent: function(){
+                        return agent;
+                    }
+                }
             });
-            $scope.$watch(function () {
-                return $mdMedia('xs') || $mdMedia('sm');
-            }, function (wantsFullScreen) {
-                $scope.customFullscreen = (wantsFullScreen === true);
-            });
+
         }
 
         $scope.removeAgent = function (ip) {
@@ -266,7 +263,7 @@ materialAdmin
     // =========================================================================
     // Add or edit agent dialog controller
     // =========================================================================
-    .controller('addOrEditAgentDialogController', function ($scope, $rootScope, $mdDialog, hubService, isEditing, agent) {
+    .controller('addOrEditAgentDialogController', function ($scope, $rootScope, $uibModalInstance, hubService, isEditing, agent) {
 
 
         if (isEditing) {
@@ -277,7 +274,7 @@ materialAdmin
         }
 
         $scope.cancel = function () {
-            $mdDialog.cancel();
+        	$uibModalInstance.dismiss('cancel');
         }
 
         $scope.ok = function (agent) {
@@ -298,7 +295,7 @@ materialAdmin
                 return;
             }
 
-            $mdDialog.hide();
+            $uibModalInstance.close(agent);
 
             if (!$scope.isEditing) {
 
@@ -420,7 +417,7 @@ materialAdmin
             var terminated = false;
 
             swal({
-                    title: "Give an marker to this experiment.", text: "Marker:",
+                    title: "Give a marker to this experiment.", 
                     type: "input", showCancelButton: true,
                     closeOnConfirm: true, animation: "slide-from-top",
                     inputPlaceholder: "Experiment marker"

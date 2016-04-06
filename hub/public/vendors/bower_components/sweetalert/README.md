@@ -1,4 +1,4 @@
-SweetAlert
+SweetAlert [![Build Status](https://travis-ci.org/t4t5/sweetalert.svg?branch=master)](https://travis-ci.org/t4t5/sweetalert)
 ==========
 
 An awesome replacement for JavaScript's alert.
@@ -46,19 +46,19 @@ Examples
 The most basic message:
 
 ```javascript
-sweetAlert("Hello world!");
+swal("Hello world!");
 ```
 
 A message signaling an error:
 
 ```javascript
-sweetAlert("Oops...", "Something went wrong!", "error");
+swal("Oops...", "Something went wrong!", "error");
 ```
 
 A warning message, with a function attached to the "Confirm"-button:
 
 ```javascript
-sweetAlert({
+swal({
   title: "Are you sure?",
   text: "You will not be able to recover this imaginary file!",
   type: "warning",
@@ -77,7 +77,7 @@ sweetAlert({
 A prompt modal where the user's input is logged:
 
 ```javascript
-sweerAlert({
+swal({
   title: "An input!",
   text: 'Write something interesting:',
   type: 'input',
@@ -85,7 +85,25 @@ sweerAlert({
   closeOnConfirm: false,
   animation: "slide-from-top"
 }, function(inputValue){
-  console.log("You wrote", inputValue);   
+  console.log("You wrote", inputValue);
+});
+```
+
+Ajax request example:
+
+```javascript
+swal({
+  title: 'Ajax request example',
+  text: 'Submit to run ajax request',
+  type: 'info',
+  showCancelButton: true,
+  closeOnConfirm: false,
+  disableButtonsOnConfirm: true,
+  confirmLoadingButtonColor: '#DD6B55'
+}, function(inputValue){
+  setTimeout(function() {
+    swal('Ajax request finished!');
+  }, 2000);
 });
 ```
 
@@ -125,7 +143,7 @@ If you want to contribute:
 
 - Make sure you have [Node](http://nodejs.org/), [NPM](https://www.npmjs.com/) and [Gulp](http://gulpjs.com/) installed. When in the SweetAlert directory, run `npm install` to install the dependencies. Then run `gulp` while working to automatically minify the SCSS and JS-files.
 
-- Keep in min that SweetAlert uses Browserify in order to compile ES6-files. For easy debugging, make sure you reference the file `dist/sweetalert-dev.js` instead of `sweetalert.js`.
+- Keep in mind that SweetAlert uses Browserify in order to compile ES6-files. For easy debugging, make sure you reference the file `dist/sweetalert-dev.js` instead of `sweetalert.js`.
 
 - After you're done, make a pull request and wait for approval! :)
 
@@ -137,4 +155,3 @@ Related projects
 * [SweetAlert for Bootstrap](https://github.com/lipis/bootstrap-sweetalert)
 * [SweetAlert for AngularJS](https://github.com/oitozero/ngSweetAlert)
 * [SweetAlert for RubyOnRails](https://github.com/sharshenov/sweetalert-rails)
-

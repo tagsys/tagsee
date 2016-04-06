@@ -6,16 +6,15 @@
 
     <section id="content" class="page-view">
 
-        <div class="container">
+        <div class="container" ng-controller="hubController">
             <div class="block-header"></div>
-            <div class="card" data-ng-controller="hubController">
+            <div class="card" >
                 <div class="card-header ch-alt m-b-20">
                     <h2>
                         Hub Dashboard
                         <small>Manage multiple readers.
                         </small>
                     </h2>
-                    <a ui-sref="test">test</a>
                     <ul class="actions">
                         <li>
                             <a href="" ng-click="discover()"> <i class="zmdi zmdi-refresh-alt"></i>
@@ -31,8 +30,8 @@
                 <div class="card-body">
                     <div class="listview lv-bordered lv-lg">
 
-                        <div class="lv-item media" href="" data-ng-repeat="agent in agents" style="cursor: pointer;" ui-sref="reader({ip:agent.ip,name:agent.name})"
-                             ui-sref-opts="{reload: true, notify: true}">
+                        <div class="lv-item media" href="" data-ng-repeat="agent in agents" style="cursor: pointer;"
+                             ng-dblclick="go({ip:agent.ip,name:agent.name})" >
 
                                 <div class="pull-left">
                                     <img class="lv-img-sm" data-ng-src="img/icons/reader.png" alt="">
@@ -71,8 +70,6 @@
                         </div>
 
                         <div class="clearfix"></div>
-
-                        <a class="lv-footer" href="">View All</a>
                     </div>
                 </div>
             </div>

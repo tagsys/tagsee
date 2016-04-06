@@ -1,56 +1,41 @@
-<md-dialog aria-label="Mango (Fruit)"  ng-cloak>
-    <form>
-        <md-toolbar>
-            <div class="md-toolbar-tools">
-                <h2 style="color:white">Add or edit reader agent</h2>
-                <span flex></span>
-                <md-button class="md-icon-button" ng-click="cancel()">
-                    <md-icon class="zmdi zmdi-close" aria-label="Close dialog"></md-icon>
-                </md-button>
+
+<div class="modal-content">
+    <div class="modal-header bgm-blue">
+        <h4 class="modal-title" style="color: white;">Add or edit reader agent</h4>
+    </div>
+    <div class="modal-body" style="padding-top: 10px;">
+        <div class="form-group has-success has-feedback">
+            <label class="control-label" for="ip">IP Address:</label>
+            <div class="fg-line">
+                <input type="text" class="form-control" id="ip"
+                       ng-disabled="isEditing" ng-model="agent.ip">
             </div>
-        </md-toolbar>
-        <md-dialog-content>
-            <div  class="card">
-                <div class="card-header">
-                    <h2>Agent information
-                        <small>An agent has a corresponding physical reader. It maintains inner states of the real reader.</small>
-                    </h2>
-                </div>
-
-                <div class="card-body card-padding">
-                    <div class="form-group has-success has-feedback">
-                        <label class="control-label" for="ip">IP Address:</label>
-                        <div class="fg-line">
-                            <input type="text" class="form-control" id="ip" ng-disabled="isEditing" ng-model="agent.ip">
-                        </div>
-                    </div>
-
-                    <div class="form-group has-success has-feedback">
-                        <label class="control-label" for="name">Name:</label>
-                        <div class="fg-line">
-                            <input type="text" class="form-control" id="name" ng-model="agent.name">
-                        </div>
-                    </div>
-
-                    <div class="form-group has-success has-feedback">
-                        <label class="control-label" for="remark">Remark:</label>
-                        <div class="fg-line">
-                            <input type="text" class="form-control" id="remark" ng-model="agent.remark">
-                        </div>
-                    </div>
-
-                    <div layout="row">
-                        <span flex></span>
-                        <md-button ng-click="cancel()" class="btn btn-default" >
-                            Cancel
-                        </md-button>
-                        <md-button type="submit" ng-click="ok(agent)" class="btn btn-success"
-                                   style="margin-right:20px;" >
-                            Submit
-                        </md-button>
-                    </div>
-                </div>
+        </div>
+        <div class="form-group has-success has-feedback">
+            <label class="control-label" for="name">Name:</label>
+            <div class="fg-line">
+                <input type="text" class="form-control" id="name"
+                       ng-model="agent.name">
             </div>
-        </md-dialog-content>
-    </form>
-</md-dialog>
+        </div>
+
+        <div class="form-group has-success has-feedback">
+            <label class="control-label" for="remark">Remark:</label>
+            <div class="fg-line">
+                <input type="text" class="form-control" id="remark"
+                       ng-model="agent.remark">
+            </div>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn  btn-success waves-effect"
+                ng-click="ok(agent)">Save
+        </button>
+        <button type="button" class="btn btn-link waves-effect"
+                ng-click="cancel()">Cancel
+        </button>
+    </div>
+</div>
+
+
+

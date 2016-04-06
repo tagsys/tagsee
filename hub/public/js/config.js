@@ -1,5 +1,6 @@
 materialAdmin
     .config(function ($stateProvider, $urlRouterProvider){
+        $urlRouterProvider.otherwise("/home");
 
 
         $stateProvider
@@ -14,7 +15,7 @@ materialAdmin
             .state('test',{
                 url:"/test",
                 templateUrl:'views/test.html'
-            });
+            })
 
-        $urlRouterProvider.otherwise("/home");
+            
     });
