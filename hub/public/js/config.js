@@ -12,9 +12,9 @@ materialAdmin
                 url:'/reader/:ip?:name',
                 templateUrl:'views/reader.html'
             })
-            .state('test',{
-                url:"/test",
-                templateUrl:'views/test.html'
+            .state('vis',{
+                url:"/vis/:expId",
+                templateUrl:'views/visualization.html'
             })
 
             

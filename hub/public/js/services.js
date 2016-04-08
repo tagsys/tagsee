@@ -83,122 +83,181 @@ materialAdmin
 
         }
 
-        service.createAgent = function(ip,name,remark){
+        service.createAgent = function (ip, name, remark) {
 
-            return utilService.post("/service/agent/create",{
-                ip:ip,name:name,remark:remark
+            return utilService.post("/service/agent/create", {
+                ip: ip, name: name, remark: remark
             });
         }
 
-        service.updateAgent = function(ip,name,remark){
-            return utilService.post("/service/agent/"+ip+"/update",{
-                name:name, remark:remark
+        service.updateAgent = function (ip, name, remark) {
+            return utilService.post("/service/agent/" + ip + "/update", {
+                name: name, remark: remark
             });
         }
-        
-        service.removeAgent = function(ip){
-        	return utilService.post("/service/agent/"+ip+"/remove");
+
+        service.removeAgent = function (ip) {
+            return utilService.post("/service/agent/" + ip + "/remove");
         }
 
-        service.startAgent = function(ip){
-            return utilService.get("service/agent/"+ip+"/start");
+        service.startAgent = function (ip) {
+            return utilService.get("service/agent/" + ip + "/start");
         }
-        
-    
+
 
         return service;
     })
-    .service('expService',function(){
 
-        var service = {
-             db : new PouchDB('tagsee')
-        };
+    // =========================================================================
+    // Data service
+    // =========================================================================
 
-        var startTimer = function(exp){
-            $timeout(function(){
-                exp.elapse = exp.elapse+1;
-                if(exp.interval>0 && exp.elapse>exp.interval){
-                    service.end();
+    .service('dataService', function (utilService, Loki, $timeout, $websocket, $location) {
+
+        var service = {}
+
+        service._idbAdapter = new LokiIndexedAdapter('tagsee');
+        service._db = new Loki("tagsee.json", {
+            autosave: true,
+            autosaveInterval: 5000,
+            persistenceMethod: 'adapter',
+            adapter: service._idbAdapter
+        })
+
+        service.load = function (callback) {
+            service._db.loadDatabase({}, function (result) {
+                service._expCollection = service._db.getCollection('exp');
+                console.log(service._expCollection);
+                if (!service._expCollection) {
+                    service._expCollection = service._db.addCollection('exp');
                 }
-                if(exp.isReading){
+
+                callback(service._expCollection);
+            });
+        }
+
+
+
+        var dataStream = $websocket('ws://'+location.host+'/socket');
+
+        var collection = [];
+
+        dataStream.onMessage(function(message) {
+            if(!service.currentExp) {
+                return;
+            }
+
+            var result = JSON.parse(message.data);
+            if(result.errorCode==0){
+                console.log("tags:"+result.tags);
+                result.tags.forEach(function(tag){
+                    service.currentExp.readings.push(tag);
+                    service.currentExp.amount = service.currentExp.amount+1;
+                })
+            }
+        });
+
+        dataStream.onError(function(message){
+            sweetAlert("Oops...Something wrong!", "Websocket error....", "error");
+        })
+
+        var startTimer = function (exp) {
+            $timeout(function () {
+                exp.elapse = exp.elapse + 1;
+                if (exp.interval > 0 && exp.elapse > exp.interval) {
+                    service.end(exp, function () {
+                    });
+                }
+                if (exp.isReading) {
                     startTimer(exp);
                 }
-            },1000);
+            }, 1000);
         }
 
-        service.begin = function(ip,marker,interval){
+        service.begin = function (ip, marker, interval, cb) {
             var exp = {
                 ip: ip,
-                marker:marker,
+                marker: marker,
                 startTime: new Date().getTime(),
-                interval:interval,
-                isReading:true,
+                interval: interval,
+                isReading: true,
                 elapse: 0, // time for the experiment.
-                mode: 0 // experiment or reading.
+                readings:[]
             };
 
-            db.post(exp).then(function(result){
-                exp._id = result.id;
-                exp._rev = result.rev;
-                $scope.current = exp;
-                $scope.load();
-                startTimer(exp);
-            },function(result){
-                exp.errorCode = result.errorCode;
-                sweetAlert("Oops...Something wrong!", result, "error");
-            });
-        }
+            exp = service._expCollection.insert(exp);
 
-        service.end = function(exp, cb){
-            exp.isReading = false;
-            exp.endTime = new Date().getTime();
-            db.post( exp).then(function(result){
-                if(cb) cb();
-            },function(result){
-                sweetAlert("Oops...Something wrong!", result, "error");
-            });
-        }
+            service._db.saveDatabase();
+            service.currentExp = exp;
 
-        service.query = function(cb, pageIndex, pageSize){
-
-        }
-
-        service.discard = function(exp, cb){
-            swal({title: "Are you sure? ",
-                    text: "All readings related to this experiment will be deleted.",
-                    type: "warning",   showCancelButton: true,   confirmButtonColor: "#DD6B55",
-                    confirmButtonText: "Yes, delete it!",   closeOnConfirm: false },
-                function(){
-                    db.remove(exp._id,exp._rev,function(){
-                        $scope.load();
-                        swal("Deleted!", "This experiment is deleted.", "success");
-                    })
+            if (exp) {
+                utilService.get('/service/agent/' + exp.ip + "/start").then(function (result) {
+                    startTimer(exp);
+                    cb(null, exp);
+                }, function (result) {
+                    cb(result);
+                    if (result.errorCode) {
+                        exp.error = result.errorCode;
+                    } else {
+                        exp.error = 505;
+                    }
                 })
+            } else {
+                cb({errorCode: -1, errorMessage: "It fails to insert the new experiment to database."});
+            }
+
+        }
+
+        service.end = function (exp, cb) {
+
+            var ip = null;
+
+            if (!(typeof(exp) === 'string')) {
+                exp.isReading = false;
+                exp.endTime = new Date().getTime();
+                service._expCollection.update(exp);
+                ip = exp.ip;
+            } else {
+                ip = exp;
+            }
+
+            service.currentExp = null;
+
+            utilService.get('/service/agent/' + ip + "/stop").then(function (result) {
+                cb(null, exp);
+            }, function (result) {
+                cb(result);
+                exp.error = result.errorCode;
+            })
+
+
+        }
+
+        service.query = function (cb, pageIndex, pageSize) {
+            
+
+        }
+
+        service.discard = function (exp, cb) {
+
+            service._expCollection.remove(exp);
+
+        }
+
+        service.destroy = function(){
+            console.log('destroy....');
+            service._idbAdapter.getDatabaseList(function(result) {
+                // result is array of string names for that appcontext ('finance')
+                result.forEach(function(str) {
+                    console.log(str);
+                });
+            });
+            service._idbAdapter.deleteDatabase("tagsee.json");
         }
 
         return service;
     })
-    .service('readService', function(){
 
-        var service = {
-            db : new PouchDB('tagsee')
-        };
-
-        service.addRead = function(exp,tag){
-
-        }
-
-        service.download = function(expId){
-
-        }
-
-        service.query = function(expId){
-
-        }
-
-        return service;
-
-    })
     // =========================================================================
     // Header Messages and Notifications list Data
     // =========================================================================

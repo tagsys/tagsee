@@ -320,57 +320,51 @@ materialAdmin
     // =========================================================================
     // Add or edit agent dialog controller
     // =========================================================================
-    .controller('readerController', function ($scope, $stateParams, $timeout,growlService) {
+    .controller('readerController', function ($scope,$state, $stateParams, $timeout,$filter,growlService, dataService,ngTableParams) {
 
         $scope.name = $stateParams.name;
         $scope.ip = $stateParams.ip;
         $scope.current = null;
         $scope.experiments = [];
+
+
+        $scope.expTablePrams = new ngTableParams({page: 1, count: 10, sorting: {name: 'desc'}},
+            {
+                getData: function($defer, params){
+                    console.log(params.sorting());
+                    var orderedData = params.sorting() ? $filter('orderBy')($scope.experiments, params.orderBy()) : $scope.experiments;
+                    params.total(orderedData.length);
+                    $defer.resolve(orderedData.slice((params.page() - 1) * params.count(), params.page() * params.count()));
+                }
+            });
+
         $scope.focused = null;
 
-        var db = new PouchDB('tagsee');
 
-        $scope.load = function () {
-            db.query(function(doc){
-                if(doc.mode==0){
-                    emit(doc.id);
-                }
-            },{include_docs:true}).then(function(result){
-
-                $scope.experiments = [];
-
-                console.log(result);
-                result.rows.forEach(function(row){
-                    $scope.experiments.push(row.doc);
-                },function(result){
-                    console.log(result);
-                })
-
-                $scope.$apply();
+        dataService.load(function(expCollection){
+           $scope.experiments =  expCollection.data;
+            expCollection.on('insert',function(){
+                $scope.expTablePrams.reload();
             })
+            $scope.expTablePrams.reload();
+        });
 
-        }
 
-        $scope.load();
-
-        $scope.cleandb = function(){
+        $scope.destroy = function(){
             swal({   title: "Are you sure to delete the database? ",
                 text: "All experiment records and readings will be deleted.",
                 type: "warning",   showCancelButton: true,   confirmButtonColor: "#DD6B55",
-                confirmButtonText: "Yes, delete it!",   closeOnConfirm: false },
-                function(){
-                    db.destroy().then(function(){
-                        db = new PouchDB('tagsee');
-                        $scope.load();
-                        swal("Deleted!", "The database is cleaned.", "success");
-
-                    })
+                confirmButtonText: "Yes, delete it!",   closeOnConfirm: true },
+                function(input){
+                    if(input == false) return;
+                    dataService.destroy();
+                    $scope.$apply();
                 })
         }
 
 
-        $scope.focus = function(experiment){
-            $scope.focused = experiment;
+        $scope.go = function(experiment){
+            $state.go('vis',{expId:experiment.$loki},{reload: true, notify: true});
         }
 
 
@@ -380,49 +374,16 @@ materialAdmin
             swal({title: "Are you sure? ",
                     text: "All readings related to this experiment will be deleted.",
                     type: "warning",   showCancelButton: true,   confirmButtonColor: "#DD6B55",
-                    confirmButtonText: "Yes, delete it!",   closeOnConfirm: false },
-                function(){
-                    console.log(experiment);
-                    db.remove(experiment._id,experiment._rev,function(){
-                        $scope.load();
-                        swal("Deleted!", "This experiment is deleted.", "success");
-                    })
+                    confirmButtonText: "Yes, delete it!",   closeOnConfirm: true },
+                function(input){
+
+                    if(!input) return false;
+
+                    dataService.discard(experiment);
+
+                    $scope.expTablePrams.reload();
+
                 })
-        }
-
-        var startTimer = function(exp){
-            $timeout(function(){
-                exp.elapse = exp.elapse+1;
-                if(exp.interval>0 && exp.elapse>exp.interval){
-                    $scope.stop();
-                }
-                if(exp.isReading){
-                    startTimer(exp);
-                }
-            },1000);
-        }
-
-        var beginExperiment = function(marker, interval){
-            var exp = {
-                ip: $stateParams.ip,
-                marker:marker,
-                startTime: new Date().getTime(),
-                interval:interval,
-                isReading:true,
-                elapse: 0, // time for the experiment.
-                mode: 0 // experiment or reading.
-            };
-
-            db.post(exp).then(function(result){
-                exp._id = result.id;
-                exp._rev = result.rev;
-                $scope.current = exp;
-                $scope.load();
-                startTimer(exp);
-            },function(result){
-                exp.errorCode = result.errorCode;
-                sweetAlert("Oops...Something wrong!", result, "error");
-            });
         }
 
 
@@ -452,26 +413,39 @@ materialAdmin
                         inputValue = "exp-"+ Math.floor(Math.random()*10000);
                     }
 
-                    beginExperiment(inputValue,interval);
+                    dataService.begin($scope.ip, inputValue, interval, function(error, exp){
+                        if(error){
+                            sweetAlert("Oops...Something wrong! Error("+error.errorCode+")", error.errorMessage, "error");
+                        }else {
+                            console.log('begin a new experiment');
+                            $scope.current = exp;
+                        }
+                    });
                 });
 
 
         }
 
         $scope.stop = function(){
-            $scope.current.isReading = false;
-            $scope.current.endTime = new Date().getTime();
-            db.post( $scope.current).then(function(result){
-                $scope.load();
-            },function(result){
-                sweetAlert("Oops...Something wrong!", result, "error");
-            });
+            if($scope.current){
+            dataService.end($scope.current, function(error){
+                if(error){
+                    sweetAlert("Oops...Something wrong! Error("+error.errorCode+")", error.errorMessage, "error");
+                }
+            })
+            }else{
+                dataService.end($scope.ip, function(error){
+                    if(error){
+                        sweetAlert("Oops...Something wrong! Error("+error.errorCode+")", error.errorMessage, "error");
+                    }
+                })
+            }
         }
 
-        $scope.filterExperiment = function(experiment){
+        $scope.filterExp = function(experiment){
 
             //always show the current experiment.
-            if($scope.current && experiment._id==$scope.current._id) return true;
+            if($scope.current && experiment.$loki==$scope.current.$loki) return true;
 
             var result = experiment.ip === $stateParams.ip;
             if($scope.expFilter && experiment.marker){

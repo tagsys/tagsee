@@ -3,6 +3,7 @@ package org.tagsys.tagsee;
 import org.apache.log4j.BasicConfigurator;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
+import org.apache.mina.common.RuntimeIOException;
 
 import com.google.gson.Gson;
 
@@ -23,7 +24,7 @@ public class HubLauncher {
 
 		Spark.externalStaticFileLocation("public");
 
-		Spark.webSocket("/service/reading", WebSocketHandler.class);
+		Spark.webSocket("/socket", WebSocketHandler.class);
 
 		Spark.init();
 
@@ -62,6 +63,15 @@ public class HubLauncher {
 
 		Spark.get("/service/agent/:ip/stop", (req, resp) -> {
 			return hub.stopAgent(req, resp);
+		});
+		
+		Spark.exception(RuntimeIOException.class, (e, req, resp)->{
+		
+			resp.status(200);
+			resp.type("application/json");
+			
+			resp.body(new JsonResult(505,e.getMessage()).toString());
+			
 		});
 
 	}

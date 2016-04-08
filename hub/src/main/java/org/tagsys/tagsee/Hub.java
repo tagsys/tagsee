@@ -237,7 +237,7 @@ public class Hub implements LLRPEndpoint {
 			result.setErrorCode(1013);
 			result.setErrorMessage(e.getMessage());
 			return result;
-		}
+		} 
 
 	}
 
@@ -306,6 +306,7 @@ public class Hub implements LLRPEndpoint {
 			if(!agent.start()){
 				return new JsonResult(1005);
 			}
+			
 			return new JsonResult(0);
 		} catch (LLRPConnectionAttemptFailedException e) {
 			e.printStackTrace();
@@ -345,6 +346,7 @@ public class Hub implements LLRPEndpoint {
 	 public static void broadcast(String message){
 	    	sessions.stream().filter(Session::isOpen).forEach(session->{
 	    		try {
+	    			System.out.println("broadcast....");
 					session.getRemote().sendString(message);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -435,7 +437,7 @@ public class Hub implements LLRPEndpoint {
 	@Override
 	public void messageReceived(LLRPMessage message) {
 	
-		logger.debug("Received " + message.getName() + " message asychronously");
+		logger.info("Received " + message.getName() + " message asychronously");
 
 		if (message.getTypeNum() == RO_ACCESS_REPORT.TYPENUM) {
 			RO_ACCESS_REPORT report = (RO_ACCESS_REPORT) message;
