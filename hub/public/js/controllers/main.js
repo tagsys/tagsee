@@ -318,36 +318,68 @@ materialAdmin
         }
     })
     // =========================================================================
-    // Add or edit agent dialog controller
+    // Reader controller
     // =========================================================================
     .controller('readerController', function ($scope,$state, $stateParams, $timeout,$filter,growlService, dataService,ngTableParams) {
 
         $scope.name = $stateParams.name;
         $scope.ip = $stateParams.ip;
         $scope.current = null;
-        $scope.experiments = [];
-
-
-        $scope.expTablePrams = new ngTableParams({page: 1, count: 10, sorting: {name: 'desc'}},
-            {
-                getData: function($defer, params){
-                    console.log(params.sorting());
-                    var orderedData = params.sorting() ? $filter('orderBy')($scope.experiments, params.orderBy()) : $scope.experiments;
-                    params.total(orderedData.length);
-                    $defer.resolve(orderedData.slice((params.page() - 1) * params.count(), params.page() * params.count()));
-                }
-            });
-
-        $scope.focused = null;
+        $scope.filterWords = "";
 
 
         dataService.load(function(expCollection){
-           $scope.experiments =  expCollection.data;
+
+            $scope.expCollection =  expCollection;
+
+            for(var i=0;i<expCollection.data.length;i++){
+                if(expCollection.data[i].isReading){
+                    $scope.current = $scope.expCollection.data[i];
+                    break;
+                }
+            }
+
+            console.log($scope.current);
+
+            // expCollection.on('update',function(){
+            //     $scope.refresh();
+            // })
             expCollection.on('insert',function(){
-                $scope.expTablePrams.reload();
+                $scope.refresh();
             })
-            $scope.expTablePrams.reload();
+            $scope.refresh();
         });
+
+
+        $scope.expTablePrams = new ngTableParams({page: 1, count: 10, sorting: {$loki: 'desc'}},
+            {
+                getData: function($defer, params){
+                    if(!$scope.expCollection){
+                        return;
+                    }
+
+                    var chain = $scope.expCollection.chain()
+                        .where(function (exp) {
+                            return exp.ip === $scope.ip && exp.marker.indexOf($scope.filterWords)>=0;
+                        });
+                    params.total(chain.data().length);
+
+                    chain = chain
+                        .simplesort(params.orderBy()[0].substring(1),params.orderBy()[0].indexOf('-')==0)
+                        .offset((params.page()-1)*params.count())
+                        .limit(params.count());
+
+                    $defer.resolve(chain.data(), params.page() * params.count());
+
+                    // var orderedData = params.sorting() ? $filter('orderBy')($scope.experiments, params.orderBy()) : $scope.experiments;
+                    // params.total(orderedData.length);
+                    // $defer.resolve(orderedData.slice((params.page() - 1) * params.count(), params.page() * params.count()));
+                }
+            });
+
+        $scope.refresh = function(){
+            $scope.expTablePrams.reload();
+        }
 
 
         $scope.destroy = function(){
@@ -358,16 +390,16 @@ materialAdmin
                 function(input){
                     if(input == false) return;
                     dataService.destroy();
-                    $scope.$apply();
+                    $scope.refresh();
                 })
         }
 
 
         $scope.go = function(experiment){
-            $state.go('vis',{expId:experiment.$loki},{reload: true, notify: true});
+            dataService.save();
+            $state.go('vis',{expId:experiment.$loki, ip:$scope.ip, name:$scope.name},{reload: true, notify: true});
         }
-
-
+        
 
         $scope.discard = function(experiment){
 
@@ -442,17 +474,77 @@ materialAdmin
             }
         }
 
-        $scope.filterExp = function(experiment){
 
-            //always show the current experiment.
-            if($scope.current && experiment.$loki==$scope.current.$loki) return true;
+    })
+    // =========================================================================
+    // Visulization controller
+    // =========================================================================
+    .controller('visController', function ($scope,$state, $stateParams, $timeout,$filter,growlService, dataService,ngTableParams) {
 
-            var result = experiment.ip === $stateParams.ip;
-            if($scope.expFilter && experiment.marker){
-                result &= experiment.marker.toLowerCase().indexOf($scope.expFilter.toLowerCase())>=0
-            }
-            return result;
+        $scope.expId = $stateParams.expId;
+        $scope.ip = $stateParams.ip;
+        $scope.name = $stateParams.name;
+
+        $scope.exp = null;
+        $scope.total = 0;
+        $scope.filters = [];
+
+        $scope.readTablePrams = new ngTableParams({page: 1, count: 10, sorting: {name: 'desc'}},
+            {
+                getData: function($defer, params){
+
+                    console.log($scope.exp);
+
+                    if($scope.exp && $scope.exp.readings) {
+
+                        var readings = [];
+
+                        $scope.filters = [];
+                        var keys = Object.keys($scope.exp.filters);
+                        if(keys){
+                            for(var i=0;i<keys.length;i++){
+                                var epc = keys[i];
+                                $scope.filters.push({'epc':epc, filtered:$scope.exp.filters[epc]})
+                            }
+                        }
+
+                        for(var i=0;i<$scope.exp.readings.length;i++){
+                            var tag = $scope.exp.readings[i];
+                            if($scope.exp.filters[tag.epc]){
+                                readings.push(tag);
+                            }
+                        }
+
+                        var orderedData = params.sorting() ? $filter('orderBy')(readings, params.orderBy()) : readings;
+                        $scope.total = orderedData.length;
+                        params.total(orderedData.length);
+                        $defer.resolve(orderedData.slice((params.page() - 1) * params.count(), params.page() * params.count()));
+                    }
+
+                    return null;
+                }
+            });
+
+        $scope.refresh = function(){
+            $scope.readTablePrams.reload();
+        }
+
+        dataService.load(function(expCollection){
+
+            $scope.exp = dataService.get($scope.expId);
+
+            $scope.refresh();
+
+        });
+
+        $scope.checkFilter = function(filter){
+
+            $scope.exp.filters[filter.epc] = filter.filtered;
+
+            dataService.save();
+
+            $scope.refresh();
+
         }
 
     })
-

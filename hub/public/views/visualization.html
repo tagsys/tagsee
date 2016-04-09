@@ -5,85 +5,56 @@
 
     <section id="content" >
 
-        <div class="container">
+        <div class="container" ng-controller="visController">
             <div class="block-header">
                 <h4>
                     <a ui-sref="home" href="#">
                         <i class="zmdi zmdi-arrow-left zmdi-hc-fw"></i>Hub Dashboard
                     </a>
-
+                    <a ui-sref="reader({'ip':ip,'name':name})" href="#" >
+                        <i class="zmdi zmdi-arrow-left zmdi-hc-fw"></i>Experiments
+                    </a>
                 </h4>
 
 
             </div>
 
-            <div class="row">
-                <div class="col-sm-8">
-                    <div class="card">
-                        <div class="card-header ch-alt">
-                            <h2>
-                                Conduct a new experiment using <span class="f-500 c-red">{{name}} ({{ip}})</span>
-                            </h2>
-
-                            <ul class="actions">
-                                <li>
-                                    <a href="">
-                                        <i class="zmdi zmdi-settings"></i>
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
-
-                        <div class="card-body card-padding text-center">
-                            <div class="btn-group btn-group-lg" uib-dropdown>
-                                <button type="button" class="btn btn-success" ng-disabled="current.isReading" ng-click="start(0)">Start</button>
-                                <button type="button" class="btn btn-success dropdown-toggle" ng-disabled="current.isReading" uib-dropdown-toggle>
-                                    <span class="caret"></span>
-                                    <span class="sr-only">Split button dropdowns</span>
-                                </button>
-                                <ul class="dropdown-menu">
-                                    <li><a href="" ng-click="start(10)">10s</a></li>
-                                    <li><a href="" ng-click="start(30)">30s</a></li>
-                                    <li><a href="" ng-click="start(60)">60s</a></li>
-                                    <li><a href="" ng-click="start(90)">90s</a></li>
-                                    <li><a href="" ng-click="start(120)">120s</a></li>
-                                    <li><a href="" ng-click="start(150)">150s</a></li>
-                                    <li><a href="" ng-click="start(180)">180s</a></li>
-                                    <li><a href="" ng-click="start(240)">240s</a></li>
-                                    <li><a href="" ng-click="start(300)">300s</a></li>
-                                    <li><a href="" ng-click="start(360)">360s</a></li>
-                                </ul>
-                            </div>
-                                &nbsp;&nbsp;
-                            <button class="btn btn-lg bgm-red waves-effect" ng-click="stop()" ng-disabled="!current.isReading">
-                                Stop
-                            </button>
-                        </div>
-
-
-                    </div>
+            <div class="card">
+                <div class="card-header bgm-green">
+                    <h2>Filter
+                        <small>You can filter out the tags you are interested. These filtered tags' readings will be incldued from the graphics, download and list. </small>
+                    </h2>
+                    <ul class="actions">
+                        <li>
+                            <a href=""  ng-click="refresh()">
+                                <i class="zmdi zmdi-refresh" style="color: white;"></i>
+                            </a>
+                        </li>
+                    </ul>
                 </div>
-                <div class="col-sm-4">
-                    <div class="card">
-                        <div class="card-body bgm-bluegray  card-padding text-center" style="height:145px; text-align:center;">
-                            <h1 style="color:white;padding-top: 20px;">
-                                <i class="zmdi zmdi-timer" ng-show="current.isReading"></i>
-                                <i class="zmdi zmdi-timer-off" ng-show="!current.isReading"></i>
-                                <span ng-if="current.elapse">{{current.elapse}}s</span>
-                                <span ng-if="!current.elapse">0s</span>
-                            </h1>
+
+                <div class="card-body card-padding">
+                    <div class="row">
+                        <div class="col-sm-3" ng-repeat="filter in filters">
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" ng-model="filter.filtered" ng-change="checkFilter(filter)">
+                                    <i class="input-helper"></i>
+                                    {{filter.epc}}
+                                </label>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-
-
-
             <div class="card">
                 <div class="card-header ch-alt">
-                    <h2>Experiment Records | <span class="f-500 c-red">Focus on: {{focusOn.marker}}</span>
-                        <small>This table records all experiments you started.</small>
+                    <h2>Readings |
+                        <span class="f-500 c-red">Experiment: {{exp.marker}} </span>
+                        &nbsp; | &nbsp;
+                        <span class="f-500 c-cyan">Total:{{total}}</span>
+                        <small>This table shows all readings collected in this experiment.</small>
                     </h2>
                     <ul class="actions">
                         <li>
@@ -101,90 +72,41 @@
                 </div>
 
                 <div class="card-body card-padding">
-                    <div class="input-group">
-                        <span class="input-group-addon"><i class="zmdi zmdi-search zmdi-hc-fw"></i></span>
-                        <div class="fg-line">
-                            <input type="text" class="form-control" placeholder="Filtering experiment" ng-model="expFilter">
-                        </div>
-                    </div>
-                    <table class="table table-inner table-vmiddle">
-                        <thead>
-                        <tr>
-                            <th style="width: 20px">Flag</th>
-                            <th style="width: 60px">Index</th>
-                            <th>Marker</th>
-                            <th style="width: 60px">Amount</th>
-                            <th style="width: 60px">Interval</th>
-                            <th style="width: 120px">Started Time</th>
-                            <th style="width: 60px">Error</th>
-                            <th style="width: 60px">Actions</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                            <tr ng-repeat="experiment in experiments | filter:filterExperiment" style="cursor:pointer" ng-dblclick="focus(experiment)"
-                                ng-class="{'active':experiment._id == focused._id}">
-                                <td class="f-500 text-center c-red">
-                                    <i class="zmdi zmdi-flag" ng-show="experiment._id==current._id"></i>
+                    <div class="table-responsive">
+                        <table ng-table="readTablePrams" class="table table-striped table-vmiddle">
+                            <tr ng-repeat="tag in $data" style="cursor: pointer" >
+                                <td data-title="'Index'" class="f-500 c-cyan">
+                                    {{ $index+1 }}
                                 </td>
-                                <td class="f-500 c-cyan">{{$index+1}}</td>
-                                <td >{{experiment.marker}}</td>
-                                <td class="f-500 c-cyan">
-                                    <span ng-if="experiment.endTime">
-                                    {{(experiment.endTime-experiment.startTime)/1000}}
-                                    </span>
+                                <td  data-title="'EPC'" class="f-500" sortable="'epc'">
+                                    {{ tag.epc }}
                                 </td>
-                                <td class="f-500 c-cyan">{{experiment.interval|number:0}}</td>
-                                <td class="f-500 c-cyan">{{experiment.startTime|date:'short'}}</td>
-                                <td class="f-500 c-red">{{experiment.errorCode}}</td>
-                                <td class="f-500">
-                                    <div class="lv-actions actions dropdown" uib-dropdown="">
-                                        <a href="" uib-dropdown-toggle="" aria-expanded="false" class="dropdown-toggle"
-                                           aria-haspopup="true">
-                                            <i class="zmdi zmdi-more-vert"></i>
-                                        </a>
+                                <td  data-title="'Antenna'" class="f-500 c-cyan" sortable="'antenna'" >
+                                    {{tag.antenna}}
+                                </td>
+                                <td  data-title="'Channel'" class="f-500 c-cyan" sortable="'channel'" >
+                                    {{tag.channel}}
+                                </td>
+                                <td  data-title="'Phase'" class="f-500 c-cyan" sortable="'phase'" >
+                                   {{tag.phase}}
+                                </td>
+                                <td  data-title="'Rssi'" class="f-500 c-cyan"  sortable="'rssi'">
+                                    {{tag.rssi}}
+                                </td>
+                                <td  data-title="'First Seen Time'"  class="f-500 c-cyan" sortable="'firstSeenTime'" >
+                                    {{tag.firstSeenTime|date:'yy/M/dd HH:mm:s:sss'}}
+                                </td>
+                                <td data-title="'Timestamp'" class="f-500 c-cyan" sortable="'timestamp'" >
+                                    {{ tag.timestamp|date:'yy/M/dd HH:mm:s:sss'}}
+                                </td>
 
-                                        <ul class="dropdown-menu dropdown-menu-right">
-                                            <li href="" ng-click="focus(experiment)">
-                                                <a href="" >
-                                                    <i class="zmdi zmdi-zoom-in zmdi-hc-fw"></i>Focus &nbsp;&nbsp;
-                                                </a>
-                                            </li>
-                                            <li href="" ng-click="download(experiment,'json')">
-                                                <a>
-                                                    <i class="zmdi zmdi-download zmdi-hc-fw"></i>Download as JSON
-                                                </a>
-                                            </li>
-                                            <li href="" ng-click="download(experiment,'csv')">
-                                                <a>
-                                                    <i class="zmdi zmdi-download zmdi-hc-fw"></i>Download as CSV
-                                                </a>
-                                            </li>
-                                            <li href="" ng-click="discard(experiment)">
-                                                <a href="" ng-click="removeAgent(agent.ip)">
-                                                    <i class="zmdi zmdi-delete zmdi-hc-fw"></i>Discard &nbsp;&nbsp;
-                                                </a>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </td>
                             </tr>
-                        </tbody>
-                    </table>
+                        </table>
+                    </div>
                 </div>
             </div>
 
-            <div class="card">
-                <div class="card-header">
-                    <h2>Filter <small>Filtering stray tags that should never be recorded.</small></h2>
-                </div>
 
-                <div class="card-body card-padding">
-                    <label class="checkbox checkbox-inline m-r-20" ng-repeat="tag in focused.filters">
-                        <input type="checkbox" value="option1">
-                        <i class="input-helper"></i>
-                    </label>
-                </div>
-            </div>
 
             <div class="card">
                 <div class="card-header bgm-green">

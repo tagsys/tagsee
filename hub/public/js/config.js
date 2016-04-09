@@ -13,7 +13,7 @@ materialAdmin
                 templateUrl:'views/reader.html'
             })
             .state('vis',{
-                url:"/vis/:expId",
+                url:"/vis/:ip/:expId?:name",
                 templateUrl:'views/visualization.html'
             })
 

@@ -45,7 +45,7 @@
             <EnablePeakRSSI>true</EnablePeakRSSI>
             <EnableFirstSeenTimestamp>true</EnableFirstSeenTimestamp>
             <EnableLastSeenTimestamp>false</EnableLastSeenTimestamp>
-            <EnableTagSeenCount>false</EnableTagSeenCount>
+            <EnableTagSeenCount>true</EnableTagSeenCount>
             <EnableAccessSpecID>false</EnableAccessSpecID>
             <C1G2EPCMemorySelector>
                 <EnableCRC>false</EnableCRC>

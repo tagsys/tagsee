@@ -425,6 +425,7 @@ public class Hub implements LLRPEndpoint {
 			if (cd.getClass() == ImpinjPeakRSSI.class) {
 				tag.setPeekRssi(((ImpinjPeakRSSI) cd).getRSSI().intValue());
 			}
+			
 
 		}
 

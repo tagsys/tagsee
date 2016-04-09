@@ -11,6 +11,7 @@
                     <a ui-sref="home" href="#">
                         <i class="zmdi zmdi-arrow-left zmdi-hc-fw"></i>Hub Dashboard
                     </a>
+
                 </h4>
 
 
@@ -36,8 +37,11 @@
 
                         <div class="card-body card-padding text-center">
                             <div class="btn-group btn-group-lg" uib-dropdown>
-                                <button type="button" class="btn btn-success" ng-disabled="current.isReading" ng-click="start(0)">Start</button>
-                                <button type="button" class="btn btn-success dropdown-toggle" ng-disabled="current.isReading" uib-dropdown-toggle>
+                                <button type="button" class="btn btn-success" ng-disabled="current.isReading"
+                                        ng-click="start(0)">Start
+                                </button>
+                                <button type="button" class="btn btn-success dropdown-toggle"
+                                        ng-disabled="current.isReading" uib-dropdown-toggle>
                                     <span class="caret"></span>
                                     <span class="sr-only">Split button dropdowns</span>
                                 </button>
@@ -54,8 +58,8 @@
                                     <li><a href="" ng-click="start(360)">360s</a></li>
                                 </ul>
                             </div>
-                                &nbsp;&nbsp;
-                            <button class="btn btn-lg bgm-red waves-effect" ng-click="stop()" >
+                            &nbsp;&nbsp;
+                            <button class="btn btn-lg bgm-red waves-effect" ng-click="stop()">
                                 Stop
                             </button>
                         </div>
@@ -65,7 +69,8 @@
                 </div>
                 <div class="col-sm-4">
                     <div class="card">
-                        <div class="card-body bgm-bluegray  card-padding text-center" style="height:145px; text-align:center;">
+                        <div class="card-body bgm-bluegray  card-padding text-center"
+                             style="height:145px; text-align:center;">
                             <h1 style="color:white;padding-top: 20px;">
                                 <i class="zmdi zmdi-timer" ng-show="current.isReading"></i>
                                 <i class="zmdi zmdi-timer-off" ng-show="!current.isReading"></i>
@@ -80,21 +85,25 @@
             </div>
 
 
-
             <div class="card">
                 <div class="card-header ch-alt">
-                    <h2>Experiment Records | <span class="f-500 c-red">Focus on: {{focusOn.marker}}</span>
-                        <small>This table records all experiments you started.</small>
+                    <h2>Experiment Records</span>
+                        <small>Notice: All data are stored in IndexedDB of the browser.
+                            The IndexedDB is an unreliable database and its size limit varies over browsers.
+                            We strongly suggest you to download the experiments to your local storage and clean the
+                            outdated experiments to release more space in time.
+
+                        </small>
                     </h2>
                     <ul class="actions">
                         <li>
-                            <a href="" ng-click="load()">
+                            <a href="" ng-click="refresh()">
                                 <i class="zmdi zmdi-refresh"></i>
                             </a>
                         </li>
                         <li>
                             <a href="" ng-click="destroy()">
-                                <i class="zmdi zmdi-delete" ></i>
+                                <i class="zmdi zmdi-delete"></i>
                             </a>
                         </li>
                     </ul>
@@ -105,61 +114,63 @@
                     <div class="input-group">
                         <span class="input-group-addon"><i class="zmdi zmdi-search zmdi-hc-fw"></i></span>
                         <div class="fg-line">
-                            <input type="text" class="form-control" placeholder="Filtering experiment" ng-model="expFilter">
+                            <input type="text" class="form-control" placeholder="Searching" ng-model="filterWords"
+                                   ng-change="refresh()">
                         </div>
                     </div>
                     <div class="table-responsive">
                         <table ng-table="expTablePrams" class="table table-striped table-vmiddle">
-                            <tr ng-repeat="exp in $data" style="cursor: pointer" ng-dblclick="go(exp)">
-                            <td data-title="'ID'" class="f-500 c-cyan" sortable="'$loki'">
-                                {{ exp.$loki }}
-                            </td>
-                            <td  data-title="'Marker'" class="f-500" sortable="'marker'">
-                                {{ exp.marker }}
-                            </td>
-                            <td  data-title="'Interval(s)'" class="f-500 c-cyan" >
+                            <tr ng-repeat="exp in $data track by $index" style="cursor: pointer" ng-dblclick="go(exp)">
+                                <td style="width: 50px;color:red;">
+                                    <i class="zmdi zmdi-flag zmdi-hc-fw" ng-if="exp.isReading"></i>
+                                </td>
+                                <td data-title="'ID'" class="f-500 c-cyan" sortable="'$loki'">
+                                    {{ exp.$loki }}
+                                </td>
+                                <td data-title="'Marker'" class="f-500" sortable="'marker'">
+                                    {{ exp.marker }}
+                                </td>
+                                <td data-title="'Interval(s)'" class="f-500 c-cyan">
                                     <span ng-if="exp.endTime">
                                     {{(exp.endTime-exp.startTime)/1000}}
                                     </span>
-                            </td>
-                            <td  data-title="'Amount'" class="f-500 c-cyan"  sortable="'amount'">
-                                {{exp.amount}}
-                            </td>
-                            <td  data-title="'Start Time'"  class="f-500 c-cyan" sortable="'startTime'" >
-                                {{exp.startTime|date:'short'}}
-                            </td>
-                            <td data-title="'Error'" class="f-500 c-red" >
-                                {{ exp.errorCode }}
-                            </td>
-                            <td data-title="'Actions'">
-                                <div class="lv-actions actions dropdown" uib-dropdown="">
-                                    <a href="" uib-dropdown-toggle="" aria-expanded="false" class="dropdown-toggle"
-                                       aria-haspopup="true">
-                                        <i class="zmdi zmdi-more-vert"></i>
-                                    </a>
+                                </td>
+                                <td data-title="'Amount'" class="f-500 c-cyan" sortable="'amount'">
+                                    {{exp.amount}}
+                                </td>
+                                <td data-title="'Start Time'" class="f-500 c-cyan" sortable="'startTime'">
+                                    {{exp.startTime|date:'short'}}
+                                </td>
+                                <td data-title="'Error'" class="f-500 c-red">
+                                    {{ exp.errorCode }}
+                                </td>
+                                <td data-title="'Actions'">
+                                    <div class="lv-actions actions dropdown" uib-dropdown="">
+                                        <a href="" uib-dropdown-toggle="" aria-expanded="false" class="dropdown-toggle"
+                                           aria-haspopup="true">
+                                            <i class="zmdi zmdi-more-vert"></i>
+                                        </a>
 
-                                    <ul class="dropdown-menu dropdown-menu-right">
-                                        <li href="" ng-click="go(exp)">
-                                            <a href="" >
-                                                <i class="zmdi zmdi-zoom-in zmdi-hc-fw"></i>Focus &nbsp;&nbsp;
-                                            </a>
-                                        </li>
-                                        <li href="" ng-click="discard(exp)">
-                                            <a href="" ng-click="removeAgent(agent.ip)">
-                                                <i class="zmdi zmdi-delete zmdi-hc-fw"></i>Discard &nbsp;&nbsp;
-                                            </a>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </td>
-                        </tr>
+                                        <ul class="dropdown-menu dropdown-menu-right">
+                                            <li href="" ng-click="go(exp)">
+                                                <a href="">
+                                                    <i class="zmdi zmdi-zoom-in zmdi-hc-fw"></i>Focus &nbsp;&nbsp;
+                                                </a>
+                                            </li>
+                                            <li href="" ng-click="discard(exp)">
+                                                <a href="" ng-click="removeAgent(agent.ip)">
+                                                    <i class="zmdi zmdi-delete zmdi-hc-fw"></i>Discard &nbsp;&nbsp;
+                                                </a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </td>
+                            </tr>
                         </table>
                     </div>
 
                 </div>
             </div>
-
-
 
 
         </div>

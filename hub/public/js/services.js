@@ -119,21 +119,27 @@ materialAdmin
         service._idbAdapter = new LokiIndexedAdapter('tagsee');
         service._db = new Loki("tagsee.json", {
             autosave: true,
-            autosaveInterval: 5000,
+            autosaveInterval: 1000,
             persistenceMethod: 'adapter',
             adapter: service._idbAdapter
         })
 
-        service.load = function (callback) {
-            service._db.loadDatabase({}, function (result) {
-                service._expCollection = service._db.getCollection('exp');
-                console.log(service._expCollection);
-                if (!service._expCollection) {
-                    service._expCollection = service._db.addCollection('exp');
-                }
+        service._db.loaded = false;
 
+        service.load = function (callback) {
+
+            if(!service._db.loaded) {
+                service._db.loadDatabase({}, function (result) {
+                    service._expCollection = service._db.getCollection('exp');
+                    if (!service._expCollection) {
+                        service._expCollection = service._db.addCollection('exp');
+                    }
+
+                    callback(service._expCollection);
+                });
+            }else{
                 callback(service._expCollection);
-            });
+            }
         }
 
 
@@ -147,12 +153,19 @@ materialAdmin
                 return;
             }
 
+
             var result = JSON.parse(message.data);
             if(result.errorCode==0){
-                console.log("tags:"+result.tags);
                 result.tags.forEach(function(tag){
                     service.currentExp.readings.push(tag);
                     service.currentExp.amount = service.currentExp.amount+1;
+
+                    var filter = service.currentExp.filters[tag.epc];
+                    if(filter=='undefined' || filter == null){
+                        service.currentExp.filters[tag.epc]= true;
+                    }
+
+                    service.save();
                 })
             }
         });
@@ -182,7 +195,9 @@ materialAdmin
                 interval: interval,
                 isReading: true,
                 elapse: 0, // time for the experiment.
-                readings:[]
+                amount:0,
+                readings:[],
+                filters:{}
             };
 
             exp = service._expCollection.insert(exp);
@@ -224,6 +239,8 @@ materialAdmin
             service.currentExp = null;
 
             utilService.get('/service/agent/' + ip + "/stop").then(function (result) {
+                exp.amount = exp.readings.length;
+                service._expCollection.update(exp);
                 cb(null, exp);
             }, function (result) {
                 cb(result);
@@ -233,10 +250,6 @@ materialAdmin
 
         }
 
-        service.query = function (cb, pageIndex, pageSize) {
-            
-
-        }
 
         service.discard = function (exp, cb) {
 
@@ -245,14 +258,20 @@ materialAdmin
         }
 
         service.destroy = function(){
-            console.log('destroy....');
-            service._idbAdapter.getDatabaseList(function(result) {
-                // result is array of string names for that appcontext ('finance')
-                result.forEach(function(str) {
-                    console.log(str);
-                });
-            });
-            service._idbAdapter.deleteDatabase("tagsee.json");
+
+            var data = service._expCollection.data;
+
+            service._expCollection.removeDataOnly();
+            service.save();
+
+        }
+
+        service.get = function(expId){
+            return service._expCollection.get(expId);
+        }
+
+        service.save = function(){
+            service._db.save();
         }
 
         return service;
