@@ -123,13 +123,7 @@ materialAdmin.controller('visualController', function ($scope, $state, $statePar
         },1000);
     }
 
-    /**
-     * Refreshing the three charts regularly.
-     */
-    setTimeout(function(){
-        updateCharts();
 
-    },1000);
 
 
     dataService.load(function (expCollection) {
@@ -137,6 +131,7 @@ materialAdmin.controller('visualController', function ($scope, $state, $statePar
         $scope.exp = dataService.get($scope.expId);
 
         highchartsNG.ready(function(){
+
             $scope.phaseChartConfig = {
                 options:{
                     chart: {
@@ -209,6 +204,14 @@ materialAdmin.controller('visualController', function ($scope, $state, $statePar
                 series: []
             }
 
+            /**
+             * Refreshing the three charts regularly.
+             */
+            setTimeout(function(){
+                updateCharts();
+
+            },1000);
+
         },this);
 
         $scope.refresh();
@@ -236,6 +239,24 @@ materialAdmin.controller('visualController', function ($scope, $state, $statePar
         if ($scope.exp) {
             dataService.update($scope.exp);
         }
+    }
+
+    $scope.terminate = function(){
+
+        swal({   title: "Are you sure?",
+            text: "You will forcedly terminate the reading! This action will not seed close command to reader.",
+            type: "warning",   showCancelButton: true,
+            confirmButtonColor: "#DD6B55",   confirmButtonText: "Yes",
+            cancelButtonText: "No",   closeOnConfirm: true,   closeOnCancel: true },
+            function(isConfirm){
+                if (isConfirm) {
+                    $scope.exp.isReading = false;
+                    dataService.save();
+                } else {
+                    //ignore it.
+                }
+            });
+
     }
 
     $scope.download = function () {

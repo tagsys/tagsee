@@ -39,7 +39,7 @@ materialAdmin
 
         return ss;
     })
-    
+
     .service('utilService', function ($http, $q) {
         var service = {};
 
@@ -309,7 +309,7 @@ materialAdmin
                 cb(null, exp);
             }, function (result) {
                 cb(result);
-                exp.error = result.errorCode;
+                exp.error = -1;
             })
 
 
