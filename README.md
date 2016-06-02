@@ -1,1 +1,1 @@
-# tagsee  - Making RFID Research Enjoyable!
+# TagSee  - Making RFID Research Enjoyable!
