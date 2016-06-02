@@ -13,6 +13,7 @@ public class Tag {
 	private int phase;
 	private int peekRssi;
 	private long timestamp;
+	private int doppler;
 	
 	public String getEpc() {
 		return epc;
@@ -76,6 +77,15 @@ public class Tag {
 	public void setPeekRssi(int peekRssi) {
 		this.peekRssi = peekRssi;
 	}
+	
+	public int getDoppler(){
+		return doppler;
+	}
+	
+	public void setDoppler(int doppler){
+		this.doppler = doppler;
+	}
+	
 	public long getTimestamp() {
 		return timestamp;
 	}

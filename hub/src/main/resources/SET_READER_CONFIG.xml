@@ -44,7 +44,7 @@
             <EnableChannelIndex>true</EnableChannelIndex>
             <EnablePeakRSSI>true</EnablePeakRSSI>
             <EnableFirstSeenTimestamp>true</EnableFirstSeenTimestamp>
-            <EnableLastSeenTimestamp>false</EnableLastSeenTimestamp>
+            <EnableLastSeenTimestamp>true</EnableLastSeenTimestamp>
             <EnableTagSeenCount>true</EnableTagSeenCount>
             <EnableAccessSpecID>false</EnableAccessSpecID>
             <C1G2EPCMemorySelector>
@@ -62,6 +62,9 @@
             <ImpinjEnablePeakRSSI>
                 <PeakRSSIMode>Enabled</PeakRSSIMode>
             </ImpinjEnablePeakRSSI>
+            <ImpinjEnableRFDopplerFrequency>
+            	<RFDopplerFrequencyMode>Enabled</RFDopplerFrequencyMode>
+            </ImpinjEnableRFDopplerFrequency>
         </Impinj:ImpinjTagReportContentSelector>
     </ROReportSpec>
 </SET_READER_CONFIG>

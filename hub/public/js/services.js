@@ -1,9 +1,45 @@
 materialAdmin
 
+    // =========================================================================
+    // Utility service
+    // =========================================================================
 // =========================================================================
-// Utility service
+// Header Messages and Notifications list Data
 // =========================================================================
 
+    .service('messageService', ['$resource', function ($resource) {
+        this.getMessage = function (img, user, text) {
+            var gmList = $resource("data/messages-notifications.json");
+
+            return gmList.get({
+                img: img,
+                user: user,
+                text: text
+            });
+        }
+    }])
+
+    // =========================================================================
+    // Malihu Scroll - Custom Scroll bars
+    // =========================================================================
+    .service('scrollService', function () {
+        var ss = {};
+        ss.malihuScroll = function scrollBar(selector, theme, mousewheelaxis) {
+            $(selector).mCustomScrollbar({
+                theme: theme,
+                scrollInertia: 100,
+                axis: 'yx',
+                mouseWheel: {
+                    enable: true,
+                    axis: mousewheelaxis,
+                    preventDefault: true
+                }
+            });
+        }
+
+        return ss;
+    })
+    
     .service('utilService', function ($http, $q) {
         var service = {};
 
@@ -110,6 +146,10 @@ materialAdmin
 
     // =========================================================================
     // Data service
+    // EXP Structure:
+    //    filters: {epc: {filtered, amount}}
+    //    readings:[]
+    //
     // =========================================================================
 
     .service('dataService', function (utilService, Loki, $timeout, $websocket, $location) {
@@ -126,6 +166,8 @@ materialAdmin
 
         service._db.loaded = false;
 
+        service._lastHeatbeat = null;
+
         service.load = function (callback) {
 
             if(!service._db.loaded) {
@@ -135,6 +177,7 @@ materialAdmin
                         service._expCollection = service._db.addCollection('exp');
                     }
 
+                    service._db.loaded = true;
                     callback(service._expCollection);
                 });
             }else{
@@ -149,24 +192,45 @@ materialAdmin
         var collection = [];
 
         dataStream.onMessage(function(message) {
-            if(!service.currentExp) {
+
+            var result = JSON.parse(message.data);
+
+            if(result.errorCode=='undefined' || result.errorCode!=0){
+                console.log(message);
+                return;
+            }
+
+            if(result.type == "heartbeat"){
+                //ignoring, just keep alive
+                service._lastHeatbeat = result.timestamp;
+                console.log('heartbeat...');
                 return;
             }
 
 
-            var result = JSON.parse(message.data);
-            if(result.errorCode==0){
-                result.tags.forEach(function(tag){
-                    service.currentExp.readings.push(tag);
-                    service.currentExp.amount = service.currentExp.amount+1;
+            if(service.currentExp && result.type == "readings") {
 
-                    var filter = service.currentExp.filters[tag.epc];
-                    if(filter=='undefined' || filter == null){
-                        service.currentExp.filters[tag.epc]= true;
+                for (var i = 0; i < result.tags.length; i++) {
+                    var tag = result.tags[i];
+                    service.currentExp.amount = service.currentExp.amount + 1;
+                    if (!service.currentExp.readings) {
+                        service.currentExp.readings = [];
+                    }
+                    service.currentExp.readings.push(tag);
+
+                    if (!service.currentExp.filters) {
+                        service.currentExp.filters = [];
                     }
 
-                    service.save();
-                })
+                    var filters = service.currentExp.filters;
+
+                    if (filters[tag.epc]) {
+                        filters[tag.epc].amount++;
+                    } else {
+                        filters[tag.epc] = {amount: 1, checked: true};
+                    }
+
+                }
             }
         });
 
@@ -189,15 +253,18 @@ materialAdmin
 
         service.begin = function (ip, marker, interval, cb) {
             var exp = {
-                ip: ip,
-                marker: marker,
-                startTime: new Date().getTime(),
-                interval: interval,
-                isReading: true,
-                elapse: 0, // time for the experiment.
-                amount:0,
-                readings:[],
-                filters:{}
+                ip: ip, // the reader's ip
+                marker: marker, // the experiment marker
+                startTime: new Date().getTime(), // absolute start time.
+                interval: interval, //how long to read.
+                isReading: true, // determining whether it is reading
+                elapse: 0, // time elapsed for the experiment.
+                amount:0, // the total number of tags has been read.
+                filters:{}, //filtering epcs
+                readings:[], // all readings
+                visibleProperties:null, //property names visible
+                chartSettings:[],// chart settings
+                events:{'insert':[],'delete':[]}//event triggers
             };
 
             exp = service._expCollection.insert(exp);
@@ -230,7 +297,7 @@ materialAdmin
             if (!(typeof(exp) === 'string')) {
                 exp.isReading = false;
                 exp.endTime = new Date().getTime();
-                service._expCollection.update(exp);
+                // service._expCollection.update(exp);
                 ip = exp.ip;
             } else {
                 ip = exp;
@@ -239,8 +306,6 @@ materialAdmin
             service.currentExp = null;
 
             utilService.get('/service/agent/' + ip + "/stop").then(function (result) {
-                exp.amount = exp.readings.length;
-                service._expCollection.update(exp);
                 cb(null, exp);
             }, function (result) {
                 cb(result);
@@ -274,81 +339,11 @@ materialAdmin
             service._db.save();
         }
 
+        service.update = function(exp){
+            return service._expCollection.update(exp);
+        }
+
         return service;
     })
 
-    // =========================================================================
-    // Header Messages and Notifications list Data
-    // =========================================================================
 
-    .service('messageService', ['$resource', function ($resource) {
-        this.getMessage = function (img, user, text) {
-            var gmList = $resource("data/messages-notifications.json");
-
-            return gmList.get({
-                img: img,
-                user: user,
-                text: text
-            });
-        }
-    }])
-
-
-
-
-
-    // =========================================================================
-    // Malihu Scroll - Custom Scroll bars
-    // =========================================================================
-    .service('scrollService', function () {
-        var ss = {};
-        ss.malihuScroll = function scrollBar(selector, theme, mousewheelaxis) {
-            $(selector).mCustomScrollbar({
-                theme: theme,
-                scrollInertia: 100,
-                axis: 'yx',
-                mouseWheel: {
-                    enable: true,
-                    axis: mousewheelaxis,
-                    preventDefault: true
-                }
-            });
-        }
-
-        return ss;
-    })
-
-
-    //==============================================
-    // BOOTSTRAP GROWL
-    //==============================================
-
-    .service('growlService', function () {
-        var gs = {};
-        gs.growl = function (message, type) {
-
-            $.growl({
-                message: message
-            }, {
-                type: type,
-                allow_dismiss: false,
-                label: 'Cancel',
-                className: 'btn-xs btn-inverse',
-                placement: {
-                    from: 'top',
-                    align: 'center'
-                },
-                delay: 2500,
-                animate: {
-                    enter: 'animated bounceIn',
-                    exit: 'animated bounceOut'
-                },
-                offset: {
-                    x: 20,
-                    y: 85
-                }
-            });
-        }
-
-        return gs;
-    })

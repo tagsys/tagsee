@@ -20,6 +20,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.TimeoutException;
 
 import org.apache.log4j.Logger;
@@ -27,6 +29,7 @@ import org.eclipse.jetty.websocket.api.Session;
 import org.eclipse.jetty.websocket.api.annotations.WebSocket;
 import org.llrp.ltk.exceptions.InvalidLLRPMessageException;
 import org.llrp.ltk.generated.custom.parameters.ImpinjPeakRSSI;
+import org.llrp.ltk.generated.custom.parameters.ImpinjRFDopplerFrequency;
 import org.llrp.ltk.generated.custom.parameters.ImpinjRFPhaseAngle;
 import org.llrp.ltk.generated.messages.READER_EVENT_NOTIFICATION;
 import org.llrp.ltk.generated.messages.RO_ACCESS_REPORT;
@@ -49,7 +52,6 @@ import spark.Request;
 import spark.Response;
 import spark.utils.StringUtils;
 
-
 public class Hub implements LLRPEndpoint {
 	// storing all agents
 	private Map<String, Agent> agents = new HashMap<String, Agent>();
@@ -57,53 +59,61 @@ public class Hub implements LLRPEndpoint {
 	private static Logger logger = Logger.getLogger(Agent.class);
 	protected static List<Session> sessions = new ArrayList<Session>();
 
-	public Hub(){
-		
+	public Hub() {
+
 		try {
-			
+
 			this.load();
 
 		} catch (Exception e) {
 			e.printStackTrace();
-			
-		} 
-				
-		
+
+		}
+
 	}
-	
-	private void load() throws IOException{
-		
+
+	private void load() throws IOException {
+
 		File file = new File("public/data/agents.json");
-		if(!file.exists()){
+		if (!file.exists()) {
 			file.createNewFile();
 		}
-		
+
 		JsonReader reader = new JsonReader(new FileReader(file));
 		Agent[] agents = new Gson().fromJson(reader, Agent[].class);
-		
+
 		this.agents.clear();
-		if(agents!=null)
-		{
-			for(Agent a: agents){
-				this.agents.put(a.getIP(),a);
+		if (agents != null) {
+			for (Agent a : agents) {
+				this.agents.put(a.getIP(), a);
 			}
 		}
+
+		new Timer().schedule(new TimerTask() {
+			public void run() {
+				JsonResult result = new JsonResult();
+				result.put("type", "heartbeat");
+				Hub.broadcast(result.toString());
+				System.out.println("heartbeat");
+			}
+		}, 1000, 5000);
+
 	}
-	
-	private void save() throws IOException{
+
+	private void save() throws IOException {
 		File file = new File("public/data/agents.json");
-		if(!file.exists()){
+		if (!file.exists()) {
 			file.createNewFile();
 		}
-		
+
 		FileWriter writer = new FileWriter(file);
 
 		String result = gson.toJson(this.agents.values().toArray(new Agent[0]));
-		
+
 		System.out.println(result);
-		
+
 		writer.write(result);
-		
+
 		writer.close();
 	}
 
@@ -115,19 +125,20 @@ public class Hub implements LLRPEndpoint {
 	public JsonResult discover(Request req, Response resp) {
 
 		formatResponse(resp);
-		
-			JsonResult result = new JsonResult();
 
-			result.put("agents", agents);
+		JsonResult result = new JsonResult();
 
-			return result;
-		
+		result.put("agents", agents);
+
+		return result;
+
 	}
-	
-	private Map<String, String> bodyParams(Request req){
+
+	private Map<String, String> bodyParams(Request req) {
 		String body = req.body();
-		if(!StringUtils.isEmpty(body)){
-			HashMap<String, String> bodyParams = (HashMap<String, String>)gson.fromJson(body, new HashMap<String, String>().getClass());
+		if (!StringUtils.isEmpty(body)) {
+			HashMap<String, String> bodyParams = (HashMap<String, String>) gson.fromJson(body,
+					new HashMap<String, String>().getClass());
 			return bodyParams;
 		}
 		return new HashMap<String, String>();
@@ -138,13 +149,13 @@ public class Hub implements LLRPEndpoint {
 		formatResponse(resp);
 
 		Map<String, String> bodyParams = this.bodyParams(req);
- 		
+
 		String ip = bodyParams.get("ip");
 		String name = bodyParams.get("name");
 		String remark = bodyParams.get("remark");
-		
-		if(ip==null){
-			return new JsonResult(800,"Parameters is not correct.");
+
+		if (ip == null) {
+			return new JsonResult(800, "Parameters is not correct.");
 		}
 
 		if (agents.containsKey(ip)) {
@@ -162,20 +173,20 @@ public class Hub implements LLRPEndpoint {
 				e.printStackTrace();
 				return new JsonResult(500);
 			}
-			
+
 		}
 
 	}
-	
-	public JsonResult updateAgent(Request req, Response resp){
-		
+
+	public JsonResult updateAgent(Request req, Response resp) {
+
 		formatResponse(resp);
 
 		String agentIP = req.params(":ip");
 
 		Agent agent = agents.get(agentIP);
-		
-		if (agent==null) {
+
+		if (agent == null) {
 			return new JsonResult(1003);
 		}
 
@@ -184,15 +195,14 @@ public class Hub implements LLRPEndpoint {
 			agent.setName(bodyParams.get("name"));
 			agent.setRemark(bodyParams.get("remark"));
 			agent.setLastUpdatedTime(new Date().getTime());
-			
+
 			this.save();
 			return new JsonResult();
 		} catch (IOException e) {
 			e.printStackTrace();
 			return new JsonResult(500);
 		}
-		
-		
+
 	}
 
 	public JsonResult removeAegnt(Request req, Response resp) {
@@ -237,7 +247,7 @@ public class Hub implements LLRPEndpoint {
 			result.setErrorCode(1013);
 			result.setErrorMessage(e.getMessage());
 			return result;
-		} 
+		}
 
 	}
 
@@ -283,11 +293,11 @@ public class Hub implements LLRPEndpoint {
 	public JsonResult startAgent(Request req, Response resp) {
 
 		formatResponse(resp);
-		
+
 		String agentIP = req.params(":ip");
 
 		Agent agent = agents.get(agentIP);
-		
+
 		System.out.println(agentIP);
 
 		if (agent == null) {
@@ -296,17 +306,19 @@ public class Hub implements LLRPEndpoint {
 		try {
 			agent.connect(this);
 			agent.enableImpinjExtensions();
+			agent.setReaderConfiguration();
 			agent.deleteROSpecs();
-			if(!agent.addRoSpec(true)){
-				return new JsonResult(1005,"It fails to add ROSpec.");
+			if (!agent.addRoSpec(true)) {
+				return new JsonResult(1005, "It fails to add ROSpec.");
 			}
-			if(!agent.enable()){
-				return new JsonResult(1005,"It fails to enable the reader.");
-			};
-			if(!agent.start()){
+			if (!agent.enable()) {
+				return new JsonResult(1005, "It fails to enable the reader.");
+			}
+			;
+			if (!agent.start()) {
 				return new JsonResult(1005);
 			}
-			
+
 			return new JsonResult(0);
 		} catch (LLRPConnectionAttemptFailedException e) {
 			e.printStackTrace();
@@ -342,22 +354,22 @@ public class Hub implements LLRPEndpoint {
 		}
 
 	}
-	
-	 public static void broadcast(String message){
-	    	sessions.stream().filter(Session::isOpen).forEach(session->{
-	    		try {
-	    			System.out.println("broadcast....");
-					session.getRemote().sendString(message);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-	    	});
-	    }
-	
+
+	public static void broadcast(String message) {
+		sessions.stream().filter(Session::isOpen).forEach(session -> {
+			try {
+				System.out.println("broadcast....");
+				session.getRemote().sendString(message);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		});
+	}
+
 	public Tag logOneTagReport(TagReportData tr) {
-		
+
 		Tag tag = new Tag();
-		
+
 		tag.setTimestamp(new Date().getTime());
 
 		LLRPParameter epcp = (LLRPParameter) tr.getEPCParameter();
@@ -400,10 +412,12 @@ public class Hub implements LLRPEndpoint {
 		}
 
 		if (tr.getLastSeenTimestampUTC() != null) {
+			epcString += " LastFirstTimestamp: " + tr.getLastSeenTimestampUTC().getMicroseconds().toLong();
 			tag.setLastSeenTime(tr.getLastSeenTimestampUTC().getMicroseconds().toLong());
 		}
 
 		if (tr.getPeakRSSI() != null) {
+			epcString += " PeakRSSI: " + tr.getPeakRSSI().getPeakRSSI().intValue();
 			tag.setRssi(tr.getPeakRSSI().getPeakRSSI().intValue());
 		}
 
@@ -423,21 +437,25 @@ public class Hub implements LLRPEndpoint {
 				tag.setPhase(((ImpinjRFPhaseAngle) cd).getPhaseAngle().toInteger().intValue());
 			}
 			if (cd.getClass() == ImpinjPeakRSSI.class) {
+				epcString += "peakRssi:" + ((ImpinjPeakRSSI) cd).getRSSI().intValue();
 				tag.setPeekRssi(((ImpinjPeakRSSI) cd).getRSSI().intValue());
 			}
-			
+			if (cd.getClass() == ImpinjRFDopplerFrequency.class) {
+				epcString += "Doppler:" + ((ImpinjRFDopplerFrequency) cd).getDopplerFrequency().intValue();
+				tag.setDoppler(((ImpinjRFDopplerFrequency) cd).getDopplerFrequency().intValue());
+			}
 
 		}
 
 		logger.info(epcString);
-		
+
 		return tag;
 
 	}
 
 	@Override
 	public void messageReceived(LLRPMessage message) {
-	
+
 		logger.info("Received " + message.getName() + " message asychronously");
 
 		if (message.getTypeNum() == RO_ACCESS_REPORT.TYPENUM) {
@@ -449,20 +467,21 @@ public class Hub implements LLRPEndpoint {
 			Tag tag = null;
 			for (TagReportData tr : tdlist) {
 				tag = logOneTagReport(tr);
-				if(tag!=null){
+				if (tag != null) {
 					list.add(logOneTagReport(tr));
 				}
 			}
-			
+
 			JsonResult result = new JsonResult();
-			result.put("tags",list);
+			result.put("type","readings");
+			result.put("tags", list);
 			broadcast(result.toString());
-			
+
 		} else if (message.getTypeNum() == READER_EVENT_NOTIFICATION.TYPENUM) {
 			// TODO
 		}
 	}
-	
+
 	@Override
 	public void errorOccured(String s) {
 		logger.error(s);

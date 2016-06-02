@@ -6,13 +6,13 @@
 
     <section id="content" class="page-view">
 
-        <div class="container" ng-controller="hubController">
+        <div class="container" ng-controller="dashboardController">
             <div class="block-header"></div>
             <div class="card" >
                 <div class="card-header ch-alt m-b-20">
                     <h2>
-                        Hub Dashboard
-                        <small>Manage multiple readers.
+                        Dashboard
+                        <small>Manage readers.
                         </small>
                     </h2>
                     <ul class="actions">
@@ -47,24 +47,22 @@
                                     <small class="lv-small">
                                     Created at {{agent.createdTime|date:'yy-MM-dd HH:mm'}} | Updated at {{agent.lastUpdatedTime|date:'yy-MM-dd HH:mm'}}
                                     </small>
-                                    <div class="lv-actions actions dropdown" uib-dropdown="">
-                                        <a href="" uib-dropdown-toggle="" aria-expanded="false" class="dropdown-toggle"
-                                           aria-haspopup="true">
-                                            <i class="zmdi zmdi-more-vert"></i>
-                                        </a>
 
-                                        <ul class="dropdown-menu dropdown-menu-right" style="text-align: left;">
-                                            <li href="" ng-click="editAgent($event, agent)">
-                                                <a href="">
-                                                    <i class="zmdi zmdi-edit zmdi-hc-fw"></i>Edit &nbsp;&nbsp;
-                                                </a>
-                                            </li>
-                                            <li>
-                                                <a href="" ng-click="removeAgent(agent.ip)">
-                                                    <i class="zmdi zmdi-delete zmdi-hc-fw"></i>Delete &nbsp;&nbsp;
-                                                </a>
-                                            </li>
-                                        </ul>
+
+
+                                    <div class="lv-actions actions dropdown" uib-dropdown="">
+
+                                        <button class="btn btn-default waves-effect" ng-click="go({ip:agent.ip,name:agent.name})">
+                                            <i class="zmdi zmdi-search"></i>
+                                        </button>
+                                        <button class="btn btn-default waves-effect" ng-click="editAgent($event, agent)">
+                                            <i class="zmdi zmdi-edit"></i>
+                                        </button>
+                                        <button class="btn btn-default waves-effect" ng-click="removeAgent(agent.ip)">
+                                            <i class="zmdi zmdi-delete"></i>
+                                        </button>
+
+
                                     </div>
                                 </div>
                         </div>

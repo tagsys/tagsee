@@ -4,6 +4,7 @@
  */
 package org.tagsys.tagsee;
 
+import java.util.Date;
 import java.util.HashMap;
 
 import com.google.gson.Gson;
@@ -22,6 +23,7 @@ public class JsonResult extends HashMap<String, Object>{
 	public JsonResult(int errorCode){
 		
 		this.put("errorCode", errorCode);
+		this.put("timestamp", new Date().getTime());
 		
 	}
 	

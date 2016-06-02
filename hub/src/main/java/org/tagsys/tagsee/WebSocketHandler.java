@@ -12,8 +12,10 @@ import org.eclipse.jetty.websocket.api.annotations.*;
 public class WebSocketHandler {
 
 
+
     @OnWebSocketConnect
     public void onConnect(Session session) throws Exception {
+    	
     	Hub.sessions.add(session);
     }
 
