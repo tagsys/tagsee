@@ -4,8 +4,6 @@ var materialAdmin = angular.module('materialAdmin', [
     'ui.router',
     'ui.bootstrap',
     'angular-loading-bar',
-    'oc.lazyLoad',
-    'nouislider',
     'ngTable',
     'lokijs',
     'ngWebSocket',

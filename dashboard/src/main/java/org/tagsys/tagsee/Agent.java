@@ -162,6 +162,9 @@ public class Agent{
 		} catch (TimeoutException ex) {
 			logger.info("CLOSE_CONNECTION Timeouts ... continuing anyway");
 			return false;
+		} catch(Exception ex){
+			logger.info("Unknown error...");
+			return false;
 		}
 	}
 
@@ -385,7 +388,11 @@ public class Agent{
 	public ADD_ROSPEC buildROSpecFromFile() {
 		logger.info("Loading ADD_ROSPEC message from file ADD_ROSPEC.xml ...");
 		try {
-			LLRPMessage addRospec = Util.loadXMLLLRPMessage(new File("./src/main/resources/ADD_ROSPEC.xml"));
+			File file = new File("./config/rospec.xml");
+			if(!file.exists()){
+				file = new File("./config/rospec.default.xml");
+			}
+			LLRPMessage addRospec = Util.loadXMLLLRPMessage(file);
 			// TODO make sure this is an ADD_ROSPEC message
 			return (ADD_ROSPEC) addRospec;
 		} catch (FileNotFoundException ex) {
@@ -407,7 +414,13 @@ public class Agent{
 
 		LLRPMessage setConfigMsg;
 		try {
-			setConfigMsg = Util.loadXMLLLRPMessage(new File("./src/main/resources/SET_READER_CONFIG.xml"));
+			
+			File file = new File("./config/reader_config.xml");
+			if(!file.exists()){
+				file = new File("./config/reader_config.default.xml");
+			}
+			
+			setConfigMsg = Util.loadXMLLLRPMessage(file);
 
 			response = connection.transact(setConfigMsg, 10000);
 

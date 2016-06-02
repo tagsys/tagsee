@@ -16,12 +16,12 @@ public class WebSocketHandler {
     @OnWebSocketConnect
     public void onConnect(Session session) throws Exception {
     	
-    	Hub.sessions.add(session);
+    	Dashboard.sessions.add(session);
     }
 
     @OnWebSocketClose
     public void onClose(Session session, int statusCode, String reason) {
-        Hub.sessions.remove(session);
+        Dashboard.sessions.remove(session);
     }
 
     @OnWebSocketMessage

@@ -52,14 +52,14 @@ import spark.Request;
 import spark.Response;
 import spark.utils.StringUtils;
 
-public class Hub implements LLRPEndpoint {
+public class Dashboard implements LLRPEndpoint {
 	// storing all agents
 	private Map<String, Agent> agents = new HashMap<String, Agent>();
 	private Gson gson = new Gson();
 	private static Logger logger = Logger.getLogger(Agent.class);
 	protected static List<Session> sessions = new ArrayList<Session>();
 
-	public Hub() {
+	public Dashboard() {
 
 		try {
 
@@ -74,7 +74,7 @@ public class Hub implements LLRPEndpoint {
 
 	private void load() throws IOException {
 
-		File file = new File("public/data/agents.json");
+		File file = new File("./data/agents.json");
 		if (!file.exists()) {
 			file.createNewFile();
 		}
@@ -93,15 +93,14 @@ public class Hub implements LLRPEndpoint {
 			public void run() {
 				JsonResult result = new JsonResult();
 				result.put("type", "heartbeat");
-				Hub.broadcast(result.toString());
-				System.out.println("heartbeat");
+				Dashboard.broadcast(result.toString());
 			}
 		}, 1000, 5000);
 
 	}
 
 	private void save() throws IOException {
-		File file = new File("public/data/agents.json");
+		File file = new File("./data/agents.json");
 		if (!file.exists()) {
 			file.createNewFile();
 		}
@@ -109,8 +108,6 @@ public class Hub implements LLRPEndpoint {
 		FileWriter writer = new FileWriter(file);
 
 		String result = gson.toJson(this.agents.values().toArray(new Agent[0]));
-
-		System.out.println(result);
 
 		writer.write(result);
 
@@ -298,8 +295,6 @@ public class Hub implements LLRPEndpoint {
 
 		Agent agent = agents.get(agentIP);
 
-		System.out.println(agentIP);
-
 		if (agent == null) {
 			return new JsonResult(1003);
 		}
@@ -358,7 +353,6 @@ public class Hub implements LLRPEndpoint {
 	public static void broadcast(String message) {
 		sessions.stream().filter(Session::isOpen).forEach(session -> {
 			try {
-				System.out.println("broadcast....");
 				session.getRemote().sendString(message);
 			} catch (Exception e) {
 				e.printStackTrace();

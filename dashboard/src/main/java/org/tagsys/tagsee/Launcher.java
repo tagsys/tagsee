@@ -9,9 +9,9 @@ import com.google.gson.Gson;
 
 import spark.Spark;
 
-public class HubLauncher {
+public class Launcher {
 
-	private static Hub hub = new Hub();
+	private static Dashboard hub = new Dashboard();
 	private Gson gson = new Gson();
 
 	public static void main(String[] args) {

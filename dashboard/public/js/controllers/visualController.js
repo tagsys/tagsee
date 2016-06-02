@@ -335,6 +335,12 @@ materialAdmin.controller('visualController', function ($scope, $state, $statePar
         $scope.widgets[widgetName] = !$scope.widgets[widgetName];
     }
 
+    $scope.configure = function(){
+
+        sweetAlert("Oops...", "The function of configuring charts will be implemented in the next version", "error");
+
+    }
+
 
 
 })
