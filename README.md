@@ -1,5 +1,7 @@
 # <strong>TagSee  - Making RFID Research Enjoyable!</strong>
 
+
+
 ## <strong>Version</strong>
 
 <table>
@@ -45,7 +47,14 @@ bash startup.sh
 3. The system will automatically jump to dashboard page, or you can accesss the following address: <a href="http://localhost:9092">http://localhost:9092</a>
 
 ## <strong>Notice</strong>
-Dashboard utilizes IndexDB, supported by browsers, to store the readings received from tagsee. The database size is limited over browsers. Please ensure you download the experimental results to your local disk in time.
+
+* Dashboard uses IndexDB, supported by browsers, to store the readings received from tagsee. The database size is limited over browsers. Please ensure you download the experimental results to your local disk in time. In the future, I will upload the readigns to server side.
+
+* The maximum reading number is set to 50,000 (about last 1-hour reading). Older readings will be discarded when new reading incomes if the number exceeds the maximum.
+
+* Only latested 1,000 readings will be displayed in the charts to keep the rendering more smooth.
+
+* The reader and ro specification are respectively read from <code>config/reader__config.default.xml</code> and <code>config/rospec.defualt.xml</code>. If you want to change the configuration, please copy these two files and modify their names to <code>config/reader__config.xml</code> and <code>config/rospec.xml</code> (remove the 'default' word). TagSee will preferentially read configuration files from the none-default version. The change immediately works in the next experiment without need to restart TagSee.
 
 ## <strong>APIs</strong>
 
@@ -70,7 +79,7 @@ Returns:
 Path: /service/agent/create
 Action: POST
 Paramters:
-	- ip: reader ip, which should be
+	- ip: reader's ip, which should be
 	- name: name of the reader.
 	- remark: description of this reader.
 Return:
@@ -83,8 +92,8 @@ Return:
 Path: /service/agent/:ip/update
 Action: POST
 Parameters:
-	- ip: reader ip.
-	- name: the reader name.
+	- ip: reader's ip.
+	- name: the reader's name.
 	- remark: description of this reader.
 Return:
 	- errorCode: 0
@@ -96,7 +105,7 @@ Return:
 Path: /service/agent/:ip/remove 
 Action: POST
 Parameters:
-	- ip: reader ip.
+	- ip: reader's ip.
 Return:
     - errorCode: 0
 ```
@@ -150,3 +159,9 @@ Structure:
     }]
 
 ```
+
+
+
+
+
+
