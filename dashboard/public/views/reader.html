@@ -28,7 +28,7 @@
 
                             <ul class="actions">
                                 <li>
-                                    <a href="">
+                                    <a href="" ng-click="configure()">
                                         <i class="zmdi zmdi-settings"></i>
                                     </a>
                                 </li>
@@ -88,12 +88,7 @@
             <div class="card">
                 <div class="card-header ch-alt">
                     <h2>Experiment Records</span>
-                        <small>Notice: All data are stored in IndexedDB of the browser.
-                            The IndexedDB is an unreliable database and its size limit varies over browsers.
-                            We strongly suggest you to download the experiments to your local storage and clean the
-                            outdated experiments to release more space in time.
 
-                        </small>
                     </h2>
                     <ul class="actions">
                         <li>
@@ -149,11 +144,14 @@
                                 <td style="width:60px;" data-title="'Error'" class="f-500 c-red">
                                     {{ exp.errorCode }}
                                 </td>
-                                <td style="width:120px;" data-title="'Actions'">
-                                    <button class="btn btn-default waves-effect" ng-click="go(exp)">
+                                <td style="width:150px;" data-title="'Actions'">
+                                    <button class="btn btn-default btn-info waves-effect" ng-click="go(exp)">
                                         <i class="zmdi zmdi-search"></i>
                                     </button>
-                                    <button class="btn btn-default waves-effect" ng-click="discard(exp)">
+                                    <button class="btn btn-default btn-warning waves-effect" ng-click="terminate(exp)">
+                                        <i class="zmdi zmdi-dot-circle-alt"></i>
+                                    </button>
+                                    <button class="btn btn-default btn-danger waves-effect" ng-click="discard(exp)">
                                         <i class="zmdi zmdi-delete"></i>
                                     </button>
                                 </td>

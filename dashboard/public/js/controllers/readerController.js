@@ -156,5 +156,30 @@ materialAdmin.controller('readerController', function ($scope, $state, $statePar
         }
     }
 
+    $scope.terminate = function(exp){
+
+        swal({   title: "Are you sure?",
+                text: "You will forcedly terminate the reading! This action will not seed close command to reader.",
+                type: "warning",   showCancelButton: true,
+                confirmButtonColor: "#DD6B55",   confirmButtonText: "Yes",
+                cancelButtonText: "No",   closeOnConfirm: true,   closeOnCancel: true },
+            function(isConfirm){
+                if (isConfirm) {
+                    exp.isReading = false;
+                    dataService.save();
+                } else {
+                    //ignore it.
+                }
+            });
+
+    }
+
+    $scope.configure = function(){
+
+        sweetAlert("Oops...", "The function of configuring reader will be implemented in the next version", "error");
+
+    }
+
+
 
 })

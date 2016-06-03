@@ -22,13 +22,13 @@
                         </li>
                     </ul>
 
-                    <button class="btn bgm-cyan btn-float" ng-click="addAgent($event)">
+                    <button class="btn bgm-teal btn-float" ng-click="addAgent($event)">
                         <i class="zmdi zmdi-plus"></i>
                     </button>
                 </div>
 
                 <div class="card-body">
-                    <div class="listview lv-bordered lv-lg">
+                    <div class="listview lv-bordered lv-lg" style="min-height: 300px;">
 
                         <div class="lv-item media" href="" data-ng-repeat="agent in agents" style="cursor: pointer;"
                              ng-dblclick="go({ip:agent.ip,name:agent.name})" >
@@ -52,13 +52,13 @@
 
                                     <div class="lv-actions actions dropdown" uib-dropdown="">
 
-                                        <button class="btn btn-default waves-effect" ng-click="go({ip:agent.ip,name:agent.name})">
+                                        <button class="btn btn-info waves-effect" ng-click="go({ip:agent.ip,name:agent.name})">
                                             <i class="zmdi zmdi-search"></i>
                                         </button>
-                                        <button class="btn btn-default waves-effect" ng-click="editAgent($event, agent)">
+                                        <button class="btn bgm-lightblue waves-effect" ng-click="editAgent($event, agent)">
                                             <i class="zmdi zmdi-edit"></i>
                                         </button>
-                                        <button class="btn btn-default waves-effect" ng-click="removeAgent(agent.ip)">
+                                        <button class="btn btn-danger waves-effect" ng-click="removeAgent(agent.ip)">
                                             <i class="zmdi zmdi-delete"></i>
                                         </button>
 

@@ -148,6 +148,8 @@
 				</configuration>
 			</plugin>
 			
+			
+			
             <!-- 项目依赖插件  -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -250,10 +252,6 @@
                             <resources>
                                 <resource>
                                     <directory>src/main/resources/</directory>
-                                    <filtering>true</filtering>
-                                    <includes>
-                                        <include>*.bat</include>
-                                    </includes>
                                 </resource>
                             </resources>
                         </configuration>

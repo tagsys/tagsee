@@ -67,7 +67,12 @@
             <div class="card" >
                 <div class="card-header bgm-green ch-alt">
                     <h2>Readings (<span class="f-500">{{total}}</span>)
-                        <small>This table shows all readings collected in this experiment.</small>
+                        <small>This table shows all readings collected in this experiment. Notice: All data are stored in IndexedDB of the browser.
+                            The IndexedDB is an unreliable database and its size limit varies over browsers.
+                            We strongly suggest you to download the experiments to your local storage and clean the
+                            outdated experiments to release more space in time.
+
+                        </small>
                     </h2>
                     <ul class="actions">
                         <li>
@@ -75,11 +80,7 @@
                                 <i class="zmdi zmdi-refresh" style="color: white;"></i>
                             </a>
                         </li>
-                        <li>
-                            <a href="" ng-click="terminate()">
-                                <i class="zmdi zmdi-dot-circle-alt" style="color: white;"></i>
-                            </a>
-                        </li>
+
                         <li>
                             <a href="" ng-click="download()">
                                 <i class="zmdi zmdi-download" style="color: white;"></i>

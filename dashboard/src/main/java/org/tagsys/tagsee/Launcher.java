@@ -8,6 +8,9 @@ import org.apache.mina.common.RuntimeIOException;
 import com.google.gson.Gson;
 
 import spark.Spark;
+import java.awt.Desktop;
+import java.net.URI;
+
 
 public class Launcher {
 
@@ -73,6 +76,24 @@ public class Launcher {
 			resp.body(new JsonResult(505,e.getMessage()).toString());
 			
 		});
+		
+		try {
+			 String url = "http://localhost:9092";
+
+		        if (Desktop.isDesktopSupported()) {
+		            // Windows
+		            Desktop.getDesktop().browse(new URI(url));
+		        } else {
+		            // Ubuntu
+		            Runtime runtime = Runtime.getRuntime();
+		            runtime.exec("/usr/bin/firefox -new-window " + url);
+		        }			
+		} catch (Exception e2) {
+			System.out.println("It fails to open the default brower.");
+		}
+		
+		System.out.println("You can access the dashboard at http://localhost:9092");
+		
 
 	}
 
