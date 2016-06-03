@@ -70,7 +70,7 @@ Returns:
 Path: /service/agent/create
 Action: POST
 Paramters:
-	- ip: reader's ip, which should be
+	- ip: reader ip, which should be
 	- name: name of the reader.
 	- remark: description of this reader.
 Return:
@@ -83,8 +83,8 @@ Return:
 Path: /service/agent/:ip/update
 Action: POST
 Parameters:
-	- ip: reader's ip.
-	- name: the reader's name.
+	- ip: reader ip.
+	- name: the reader name.
 	- remark: description of this reader.
 Return:
 	- errorCode: 0
@@ -96,7 +96,7 @@ Return:
 Path: /service/agent/:ip/remove 
 Action: POST
 Parameters:
-	- ip: reader's ip.
+	- ip: reader ip.
 Return:
     - errorCode: 0
 ```
