@@ -156,7 +156,20 @@ Structure:
 
 ```
 
+### Reference
 
+If this project helps you, please help cite the following paper. Thanks very much.
+
+```latex
+@inproceedings{yang2014tagoram,
+  title={Tagoram: Real-time tracking of mobile RFID tags to high precision using COTS devices},
+  author={Yang, Lei and Chen, Yekui and Li, Xiang-Yang and Xiao, Chaowei and Li, Mo and Liu, Yunhao},
+  booktitle={Proceedings of ACM MobiCom},
+  pages={237--248},
+  year={2014}
+}
+
+```
 
 
 
