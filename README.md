@@ -101,29 +101,7 @@ Return:
     - errorCode: 0
 ```
 
-### 5. Connect reader
-```javascript
-
-Path: /service/agent/:ip/connect
-Action: POST
-Parameters:
-	- ip: reader's ip.
-Return:
-	- errorCode: 0
-```
-
-### 6. Disconnect reader
-```javascript
-
-Path: /service/agent/:ip/disconnect
-Action: POST
-Parameters:
-	- ip: reader's ip.
-Return:
-	- errorCode: 0
-```
-
-### 7. Start reading
+### 5. Start reading
 ```javascript
 
 Path: /service/agent/:ip/start
@@ -133,7 +111,7 @@ Return:
 	- errorCode: 0
 ```
 
-### 8. Stop reading
+### 6. Stop reading
 ```javascript
 
 Path: /service/agent/:ip/stop
@@ -143,7 +121,7 @@ Return:
 	- errorCode: 0
 ```
 
-### 9. Websocket messages
+### 7. Websocket messages
 
 TagSee uses websocket to push heartbeat and readings.
 
@@ -160,13 +138,15 @@ Structure:
 	- type: reading
 	- tags[{
 		epc: tag epc,
-        
+        phase: pahse value,
+        rssi: rss value,
+        doppler: doppler value,
+        channel: channel index,
+        antenna: antenna idnex
+        peekRssi: peek rssi (Impinj extened feild),
+        firstSeenTime: the timestamp attached by the reader,
+        lastSeenTime: the timestamp attached by the reader,
+        timestap: the timestamp attached by the tagsee
     }]
 
 ```
-
-
-
-
-
-
