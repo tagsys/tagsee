@@ -20,7 +20,7 @@
 
 ## <strong>Features</strong>
 
-Basic useful feature list:
+TagSee wraps the simple ImpinJ-extended APIs and offers a nice dashboard for quickly startup on collecting RFID readings. Basic useful feature list:
 
  * Manage your physical reader.
  * View experimental results in real-time.
@@ -43,6 +43,128 @@ bash startup.sh
 ```
 
 3. The system will automatically jump to dashboard page, or you can accesss the following address: <a href="http://localhost:9092">http://localhost:9092</a>
+
+## <strong>Notice</strong>
+Dashboard utilizes IndexDB, supported by browsers, to store the readings received from tagsee. The database size is limited over browsers. Please ensure you download the experimental results to your local disk in time.
+
+## <strong>APIs</strong>
+
+Besides controllable dashborad, TagSee also offers a set of wrapped APIs for upper applications.
+
+### 1. Discover agents
+
+```javascript
+
+Path: /service/discover
+Action: GET
+Parameters: none
+Returns:
+	- errorCode: 0
+	- agents[]: a list of agent stored in server.
+
+```
+
+### 2. Create agent
+```javascript
+
+Path: /service/agent/create
+Action: POST
+Paramters:
+	- ip: reader's ip, which should be
+	- name: name of the reader.
+	- remark: description of this reader.
+Return:
+	- errorCode: 0
+```
+
+### 3. Update agent
+```javascript
+
+Path: /service/agent/:ip/update
+Action: POST
+Parameters:
+	- ip: reader's ip.
+	- name: the reader's name.
+	- remark: description of this reader.
+Return:
+	- errorCode: 0
+```
+
+### 4. Remove agent
+```javascript
+
+Path: /service/agent/:ip/remove 
+Action: POST
+Parameters:
+	- ip: reader's ip.
+Return:
+    - errorCode: 0
+```
+
+### 5. Connect reader
+```javascript
+
+Path: /service/agent/:ip/connect
+Action: POST
+Parameters:
+	- ip: reader's ip.
+Return:
+	- errorCode: 0
+```
+
+### 6. Disconnect reader
+```javascript
+
+Path: /service/agent/:ip/disconnect
+Action: POST
+Parameters:
+	- ip: reader's ip.
+Return:
+	- errorCode: 0
+```
+
+### 7. Start reading
+```javascript
+
+Path: /service/agent/:ip/start
+Action: GET
+Parameter: None
+Return:
+	- errorCode: 0
+```
+
+### 8. Stop reading
+```javascript
+
+Path: /service/agent/:ip/stop
+Action: GET
+Parameter: Nnone
+Return:
+	- errorCode: 0
+```
+
+### 9. Websocket messages
+
+TagSee uses websocket to push heartbeat and readings.
+
+```javascript
+
+Message: Heartbeat
+Structure:
+	- errorCode: 0
+	- type: heartbeat
+
+Message: Readings
+Structure:
+	- errorCode: 0
+	- type: reading
+	- tags[{
+		epc: tag epc,
+        
+    }]
+
+```
+
 
 
 
