@@ -13,7 +13,7 @@
     </tr>
     <tr>
 	    <td>1.0</td>
-    	<td>Manage physical reader and real-tiem view experimental results.</td>
+    	<td>Manage physical reader and real-time check experimental results.</td>
         <td>2016/6/1</td>
         <td><a href="">TagSee-1.0.zip</a></td>
     </tr>
