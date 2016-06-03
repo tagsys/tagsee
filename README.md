@@ -22,7 +22,7 @@
 
 ## <strong>Features</strong>
 
-TagSee wraps the simple ImpinJ-extended APIs and offers a nice dashboard for quickly startup on collecting RFID readings. Basic useful feature list:
+TagSee wraps the ImpinJ-extended APIs and offers a nice dashboard for quickly startup on collecting RFID readings. Basic useful feature list:
 
  * Manage your physical reader.
  * View experimental results in real-time.
@@ -48,15 +48,15 @@ bash startup.sh
 
 * Dashboard uses IndexDB, supported by browsers, to store the readings received from tagsee. The database size is limited over browsers. Please ensure you download the experimental results to your local disk in time. In the future, I will upload the readigns to server side.
 
-* The maximum reading number is set to 50,000 (about last 1-hour reading). Older readings will be discarded when new reading incomes if the number exceeds the maximum.
+* The maximum reading number is set to 50,000 (about last 1-hour reading). Older readings will be discarded when new reading incomes, if the number exceeds the maximum.
 
 * Only latested 1,000 readings will be displayed in the charts to keep the rendering more smooth.
 
-* The reader and ro specification are respectively read from <code>config/reader__config.default.xml</code> and <code>config/rospec.defualt.xml</code>. If you want to change the configuration, please copy these two files and modify their names to <code>config/reader__config.xml</code> and <code>config/rospec.xml</code> (remove the 'default' word). TagSee will preferentially read configuration files from the none-default version. The change immediately works in the next experiment without need to restart TagSee.
+* The Reader and RO specification are respectively read from the files of  <code>config/reader__config.default.xml</code> and <code>config/rospec.defualt.xml</code>. If you want to change the configuration, please copy these two files and modify their names to <code>config/reader__config.xml</code> and <code>config/rospec.xml</code> (remove the 'default' word and keep the default files for safty). TagSee will preferentially read configuration files from the none-default version. The change immediately works in the next experiment without need to restart TagSee.
 
 ## <strong>APIs</strong>
 
-Besides controllable dashborad, TagSee also offers a set of wrapped APIs for upper applications.
+Besides controllable dashborad, TagSee also offers a set of wrapped APIs for upper applications. These APIs are useful if you want to develop your own applications. TagSee provides a set of RESTful style APIs and Websocket-based reading reports. You could use any language or platform to develop your applications.
 
 ### 1. Discover agents
 
