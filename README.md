@@ -15,7 +15,7 @@
 	    <td>1.0</td>
     	<td>Manage physical reader and real-time check experimental results.</td>
         <td>2016/6/1</td>
-        <td><a href="http://young.tagsys.org/data/release/tagsee-1.0.zip">TagSee-1.0.zip</a></td>
+        <td><a href="http://young.tagsys.org/data/release/tagsee-1.0.zip">tagsee-1.0.zip</a></td>
     </tr>
 </table>
 
