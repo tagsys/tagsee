@@ -212,6 +212,7 @@ materialAdmin
 
                 for (var i = 0; i < result.tags.length; i++) {
                     var tag = result.tags[i];
+
                     service.currentExp.amount = service.currentExp.amount + 1;
                     if (!service.currentExp.readings) {
                         service.currentExp.readings = [];
