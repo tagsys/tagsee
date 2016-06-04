@@ -31,7 +31,7 @@ TagSee wraps the ImpinJ-extended APIs and offers a nice dashboard for quickly st
 
 ## <strong>Supported Platforms</strong>
 
-* Windows/Mac/Linux
+* Windows/Mac/Linux + Java 8
 * ImpinJ R420 Reader
 
 ## <strong>Usage</strong>
