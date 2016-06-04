@@ -36,6 +36,8 @@ TagSee wraps the ImpinJ-extended APIs and offers a nice dashboard for quickly st
 
 ## <strong>Usage</strong>
 
+Follow the simple three steps:
+
 1.Donwload tagsee-xxx.zip and extract it to local disk
 
 2.Run the 'startup.sh' or 'startup.bat' in 'terminal' (Mac) or 'cmd' (Windows)
@@ -43,6 +45,31 @@ TagSee wraps the ImpinJ-extended APIs and offers a nice dashboard for quickly st
 bash startup.sh
 ```
 3.The system will automatically jump to dashboard page, or you can accesss the following address: <a href="http://localhost:9092">http://localhost:9092</a>
+
+## <strong>Compiling</strong>
+
+If you would like to compile the source code, then you could do it as follows:
+
+<strong>Prerequisite</strong> 
+1. Install Apache Maven. (refer to <a href="https://maven.apache.org/install.html" target="_blank">Maven</a> client)
+2. Install Bower. (refer to <a href="http://bower.io/" target="_blank">Twitter Bower</a> client).
+3. Install Git. (refer to <a href="https://git-scm.com/downloads" target="_blank">Git</a> client.)
+
+<strong>Steps</strong>
+
+1.Checkout the source code.
+```
+git clone https://github.com/tagsys/tagsee.git
+```
+2.Run the complie.sh inside `dashboard'. It is going to downlaod the neccessary js files with bower tool.
+```
+bash comiple.sh
+```
+3.Run Apache Maven commands as follows. 
+```
+mvb clean package
+```
+4.Find the compiled results in the directory named 'target'.
 
 ## <strong>Notice</strong>
 
