@@ -205,4 +205,4 @@ If this project helps you, please help cite the following paper. Thanks very muc
 
 This project acknowledges significant help, feedback, suggestions and guidance from following people.
 
-- Tianci Liu. This guy developed a primary and offline RFID reading tool for our group. It inpsires me to develop TagSee.
+- Tianci Liu. This guy developed a primary and offline RFID reading tool for our group. It inpsired me to develop TagSee.
