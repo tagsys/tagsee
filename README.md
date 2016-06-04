@@ -51,6 +51,8 @@ bash startup.sh
 If you would like to compile the source code, then you could do it as follows:
 
 <strong>Prerequisite</strong> 
+
+
 1. Install Apache Maven. (refer to <a href="https://maven.apache.org/install.html" target="_blank">Maven</a> client)
 
 2. Install Bower. (refer to <a href="http://bower.io/" target="_blank">Twitter Bower</a> client).
@@ -59,19 +61,19 @@ If you would like to compile the source code, then you could do it as follows:
 
 <strong>Steps</strong>
 
-1.Checkout the source code.
+1. Checkout the source code.
 ```
 git clone https://github.com/tagsys/tagsee.git
 ```
-2.Run the complie.sh inside `dashboard'. It is going to downlaod the neccessary js files with bower tool.
+2. Run the complie.sh inside `dashboard'. It is going to downlaod the neccessary js files with bower tool.
 ```
 bash comiple.sh
 ```
-3.Run Apache Maven commands as follows. 
+3. Run Apache Maven commands as follows. 
 ```
 mvb clean package
 ```
-4.Find the compiled results in the directory named 'target'.
+4. Find the compiled results in the directory named 'target'.
 
 ## <strong>Notice</strong>
 
