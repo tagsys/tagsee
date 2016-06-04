@@ -52,7 +52,9 @@ If you would like to compile the source code, then you could do it as follows:
 
 <strong>Prerequisite</strong> 
 1. Install Apache Maven. (refer to <a href="https://maven.apache.org/install.html" target="_blank">Maven</a> client)
+
 2. Install Bower. (refer to <a href="http://bower.io/" target="_blank">Twitter Bower</a> client).
+
 3. Install Git. (refer to <a href="https://git-scm.com/downloads" target="_blank">Git</a> client.)
 
 <strong>Steps</strong>
