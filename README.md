@@ -38,13 +38,13 @@ TagSee wraps the ImpinJ-extended APIs and offers a nice dashboard for quickly st
 
 Follow the simple three steps:
 
-1.Donwload tagsee-xxx.zip and extract it to local disk
+1. Donwload tagsee-xxx.zip and extract it to local disk
 
-2.Run the 'startup.sh' or 'startup.bat' in 'terminal' (Mac) or 'cmd' (Windows)
+2. Run the 'startup.sh' or 'startup.bat' in 'terminal' (Mac) or 'cmd' (Windows)
 ```bash
 bash startup.sh
 ```
-3.The system will automatically jump to dashboard page, or you can accesss the following address: <a href="http://localhost:9092">http://localhost:9092</a>
+3. The system will automatically jump to dashboard page, or you can accesss the following address: <a href="http://localhost:9092">http://localhost:9092</a>
 
 ## <strong>Compiling</strong>
 
