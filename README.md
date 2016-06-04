@@ -201,6 +201,8 @@ If this project helps you, please help cite the following paper. Thanks very muc
 
 ```
 
+## Acknowledgement
 
+This project acknowledge significant help, feedback, suggestions and guidance from following people.
 
-
+- Tianci Liu. This guy developed a primary and offline RFID reading tool for our group. 
