@@ -98,6 +98,8 @@
 			<groupId>org.llrp</groupId>
 			<artifactId>ltk</artifactId>
 			<version>10.16.0.240</version>
+			<scope>system</scope>
+    		<systemPath>${project.basedir}/lib/ltkjava-10.16.0.240-with-dependencies.jar</systemPath>
 		</dependency>
 		<dependency>
 			<groupId>org.eclipse.jetty</groupId>
