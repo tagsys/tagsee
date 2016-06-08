@@ -82,7 +82,7 @@ mvb clean package
 
 * The Reader and RO specification are respectively read from the files of  <code>config/reader__config.default.xml</code> and <code>config/rospec.defualt.xml</code>. If you want to change the configuration, please copy these two files and modify their names to <code>config/reader__config.xml</code> and <code>config/rospec.xml</code> (remove the 'default' word and keep the default files for safty). TagSee will preferentially read configuration files from the none-default version. The change immediately works in the next experiment without need to restart TagSee.
 
-## <strong>APIs</strong>
+## <strong>API</strong>
 
 Besides the controllable dashborad, TagSee also offers a set of wrapped APIs for upper applications. These APIs are useful if you want to develop your own applications. TagSee provides a set of RESTful style APIs and Websocket-based reading reports. You could use any language or platform to develop your applications.
 
