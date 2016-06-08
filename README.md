@@ -86,7 +86,7 @@ mvb clean package
 
 Besides the controllable dashborad, TagSee also offers a set of wrapped APIs for upper applications. These APIs are useful if you want to develop your own applications. TagSee provides a set of RESTful style APIs and Websocket-based reading reports. You could use any language or platform to develop your applications.
 
-I also give many examples over differnt programming languages in the examples directory to show how to start, stop and read tags using TagSee. Currently, these exampels are writtern using Java.
+I also give many examples over different programming languages in the examples directory to show how to start, stop and read tags using TagSee. Currently, these exampels are writtern using Java.
 
 ### 1. Discover agents
 
