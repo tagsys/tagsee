@@ -205,8 +205,8 @@ If this project helps you, please help cite the following paper. Thanks very muc
 
 ## Changelog
 
-1. 2016/6/1 - release the TagSee v1.
-2. 2016/6/8 - add Java example.
+* 2016/6/1 - release the TagSee v1.
+* 2016/6/8 - add Java example.
 
 ## Acknowledgement
 
