@@ -248,18 +248,16 @@ materialAdmin.controller('visualController', function ($scope, $state, $statePar
         var data = "";
         if ($scope.exp && $scope.exp.readings) {
 
-            var filtering = {}
-            for (var i = 0; i < $scope.filters.length; i++) {
-                filtering[$scope.filters[i].epc] = $scope.filters[i].checked;
-            }
+            console.log($scope.filters);
+
             var readings = _.filter($scope.exp.readings, function (reading) {
-                return filtering[reading.epc];
+                return $scope.filters[reading.epc].checked;
             });
 
 
             for (var i = 0; i < readings.length; i++) {
                 data += readings[i].epc + ",";
-
+                
                 if ($scope.exp.visibleProperties['antenna']) {
                     data += readings[i].antenna + ",";
                 }
