@@ -13,7 +13,7 @@
     </tr>
     <tr>
 	    <td>1.1</td>
-    	<td>Fixed bugs about download</td>
+    	<td>Fixed the issue of failure to download data.</td>
         <td>2016/6/1</td>
         <td><a href="https://www.dropbox.com/s/ge5zwqxbnotwdy9/tagsee-1.1.zip?dl=0" target="_blank">tagsee-1.1.zip</a></td>
     </tr>
