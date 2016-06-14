@@ -1,1 +1,1 @@
-java -jar tagsee-1.0.jar
+java -jar tagsee-1.1.jar

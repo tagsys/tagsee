@@ -7,7 +7,7 @@
 	MessageID="0">
 	<ResetToFactoryDefault>false</ResetToFactoryDefault>
 	<AntennaConfiguration>
-		<AntennaID>1</AntennaID>
+		<AntennaID>0</AntennaID>
     	<C1G2InventoryCommand>
 			<TagInventoryStateAware>false</TagInventoryStateAware>
 			<C1G2RFControl>
