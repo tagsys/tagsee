@@ -24,12 +24,18 @@ public class Launcher {
 		Logger.getRootLogger().setLevel(Level.INFO);
 
 		Spark.port(9092);
-
+		
 		Spark.externalStaticFileLocation("public");
 
 		Spark.webSocket("/socket", WebSocketHandler.class);
 
 		Spark.init();
+		
+		Spark.before((request, response) -> {
+			response.header("Access-Control-Allow-Origin", "*");
+			response.header("Access-Control-Request-Method", "*");
+			response.header("Access-Control-Allow-Headers", "X-Requested-With");
+		});
 
 		Spark.get("/", (req, resp) -> {
 			resp.redirect("/index.html");
