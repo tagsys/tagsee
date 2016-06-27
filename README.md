@@ -28,7 +28,7 @@
 
 ## <strong>Features</strong>
 
-TagSee wraps the ImpinJ-extended APIs and offers a nice dashboard for quickly startup on collecting RFID readings. Basic useful feature list:
+TagSee wraps the ImpinJ-extended APIs and offers a nice dashboard for quickly startup on collecting RFID readings. Basic and useful feature list:
 
  * Manage your physical reader.
  * View experimental results in real-time.
