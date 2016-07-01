@@ -83,7 +83,7 @@ mvn exec:java
 
 ## <strong>Notice</strong>
 
-* Dashboard uses IndexDB, supported by browsers, to store the readings received from tagsee. The database size is limited over browsers. Please ensure you download the experimental results to your local disk in time. In the future, I will upload the readigns to server side.
+* Dashboard uses IndexDB (bowser embeded database) to store the readings received from tagsee. The database size is limited over browsers. Please ensure you download the experimental results to your local disk in time. In the future, I will consider to upload the readigns to server side.
 
 * Only latested 1,000 readings will be displayed in the charts to keep the rendering more smooth.
 
