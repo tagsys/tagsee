@@ -30,15 +30,15 @@
 
 TagSee wraps the ImpinJ-extended APIs and offers a nice dashboard for quickly startup on collecting RFID readings. Basic and useful feature list:
 
- * Manage your physical reader.
- * View experimental results in real-time.
- * Download experimental results.
- * Filter unexpected tags.
+ * Managing your physical readers.
+ * Viewing experimental results in real-time.
+ * Downloading experimental results.
+ * Filterring unexpected tags.
 
 ## <strong>Supported Platforms</strong>
 
 * Windows/Mac/Linux + Java 8
-* ImpinJ R420 Reader
+* ImpinJ R420 Reader + LTK SDK
 
 ## <strong>Usage</strong>
 
