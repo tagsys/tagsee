@@ -33,7 +33,7 @@ TagSee wraps the ImpinJ-extended APIs and offers a nice dashboard for quickly st
  * Simple management of your physical readers.
  * Real-time view of experimental results.
  * Easy download of experimental results.
- * Slectively filterring unexpected tags.
+ * Selectively filterring unexpected tags.
 
 ## <strong>Supported Platforms</strong>
 
@@ -50,6 +50,7 @@ Follow the simple three steps:
 ```bash
 bash startup.sh
 ```
+
 3. The system will automatically jump to dashboard page, or you can accesss the following address: <a href="http://localhost:9092">http://localhost:9092</a>
 
 ## <strong>Compiling</strong>
