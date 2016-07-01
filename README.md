@@ -72,11 +72,14 @@ git clone https://github.com/tagsys/tagsee.git
 ```
 bash comiple.sh
 ```
-3.Run Apache Maven commands as follows. 
+3.Install and compile maven project. 
 ```
-mvb clean package
+mvn install
 ```
-4.Find the compiled results in the directory named 'target'.
+4.Run the maven project.
+```
+mvn exec:java
+```
 
 ## <strong>Notice</strong>
 
