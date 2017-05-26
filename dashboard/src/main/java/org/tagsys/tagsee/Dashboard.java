@@ -124,8 +124,8 @@ public class Dashboard implements LLRPEndpoint {
 		formatResponse(resp);
 
 		JsonResult result = new JsonResult();
-
-		result.put("agents", agents);
+		
+		result.put("agents", agents.values().toArray(new Agent[0]));
 
 		return result;
 
